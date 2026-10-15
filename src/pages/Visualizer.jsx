@@ -1,36 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import VisualizerControls from '../components/VisualizerControls';
 import ArrayBars from '../components/ArrayBars';
-import HeapTreeView from '../components/HeapTreeView';
 import MergeSortVisualizer from '../components/MergeSortVisualizer';
 import QuickSortVisualizer from '../components/QuickSortVisualizer';
 import HeapSortVisualizer from '../components/HeapSortVisualizer';
+import StepActionPanel from '../components/StepActionPanel';
+import PseudocodeHighlight from '../components/PseudocodeHighlight';
 import { runSortingAlgorithm } from '../algorithms';
 import { ALGORITHMS } from '../data/algorithms';
 import { playTone } from '../utils/audio';
-import { Clock, HardDrive, BarChart2, CheckCircle2, ShieldCheck, ShieldAlert, Layers, Play, Pause, SkipForward, SkipBack, RotateCcw } from 'lucide-react';
+import {
+  Clock, HardDrive, BarChart2, CheckCircle2, ShieldCheck, ShieldAlert,
+  Layers, Play, Pause, SkipForward, SkipBack, RotateCcw
+} from 'lucide-react';
+
+// Algorithms that have their own dedicated visualizers (with built-in panels)
+const DEDICATED_VIS_ALGOS = new Set(['heap-sort', 'quick-sort', 'merge-sort']);
 
 export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   const algoId = selectedAlgoId || 'bubble-sort';
   const currentAlgoData = ALGORITHMS.find(a => a.id === algoId) || ALGORITHMS[0];
 
-  // Visualizer Configuration States
   const [arraySize, setArraySize] = useState(
     algoId === 'heap-sort' ? 5 : algoId === 'quick-sort' || algoId === 'merge-sort' ? 7 : 20
   );
-  const [speed, setSpeed] = useState(300); // delay ms
+  const [speed, setSpeed] = useState(300);
   const [presetType, setPresetType] = useState('random');
   const [customInput, setCustomInput] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(false);
-  const [pivotStrategy, setPivotStrategy] = useState('last'); // for quick sort
+  const [pivotStrategy, setPivotStrategy] = useState('last');
 
-  // Playback & Step States
   const [array, setArray] = useState([]);
   const [steps, setSteps] = useState([]);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Function to generate initial array based on size & preset
   const generateNewArray = (size = arraySize, preset = presetType) => {
     let newArr = [];
     if (preset === 'random') {
@@ -64,7 +68,6 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     }
   }, [algoId, array, pivotStrategy]);
 
-  // Audio tone effect
   useEffect(() => {
     if (soundEnabled && isPlaying && steps[currentStepIdx]) {
       const step = steps[currentStepIdx];
@@ -76,7 +79,6 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     }
   }, [currentStepIdx, isPlaying, soundEnabled, speed, steps]);
 
-  // Keyboard shortcut listener (Space = Play/Pause, ArrowRight = Next, ArrowLeft = Prev, R = Reset)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (
@@ -86,14 +88,11 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
           document.activeElement.tagName === 'SELECT' ||
           document.activeElement.isContentEditable
         )
-      ) {
-        return;
-      }
+      ) return;
 
       const key = e.key;
       const code = e.code;
 
-      // Spacebar: Play / Pause (or Restart if completed)
       if (key === ' ' || key === 'Spacebar' || code === 'Space') {
         e.preventDefault();
         setIsPlaying(prev => {
@@ -103,24 +102,18 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
           }
           return !prev;
         });
-      }
-      // ArrowRight: Next Step
-      else if (key === 'ArrowRight' || code === 'ArrowRight') {
+      } else if (key === 'ArrowRight' || code === 'ArrowRight') {
         e.preventDefault();
         setIsPlaying(false);
         setCurrentStepIdx(prev => {
           if (prev >= steps.length - 1) return 0;
           return Math.min(steps.length - 1, prev + 1);
         });
-      }
-      // ArrowLeft: Previous Step
-      else if (key === 'ArrowLeft' || code === 'ArrowLeft') {
+      } else if (key === 'ArrowLeft' || code === 'ArrowLeft') {
         e.preventDefault();
         setIsPlaying(false);
         setCurrentStepIdx(prev => Math.max(0, prev - 1));
-      }
-      // Key R / r: Reset Animation
-      else if (key === 'r' || key === 'R' || code === 'KeyR') {
+      } else if (key === 'r' || key === 'R' || code === 'KeyR') {
         e.preventDefault();
         setIsPlaying(false);
         setCurrentStepIdx(0);
@@ -131,24 +124,21 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [steps.length, currentStepIdx]);
 
-  // Playback timer effect
   useEffect(() => {
     if (!isPlaying || steps.length === 0) return;
-
     if (currentStepIdx >= steps.length - 1) {
       setIsPlaying(false);
       return;
     }
-
     const timer = setTimeout(() => {
       setCurrentStepIdx(prev => prev + 1);
     }, speed);
-
     return () => clearTimeout(timer);
   }, [isPlaying, currentStepIdx, steps, speed]);
 
   const currentFrame = steps[currentStepIdx] || null;
   const isCompleted = currentStepIdx >= steps.length - 1 && steps.length > 0;
+  const isDedicatedVis = DEDICATED_VIS_ALGOS.has(algoId);
 
   const handleApplyCustomArray = (parsedArray) => {
     setArray(parsedArray);
@@ -157,39 +147,10 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   };
 
   return (
-    <div className="visualizer-page-container pb-24">
-      {/* Header Info Banner */}
-      <div className="visualizer-header">
-        <div className="title-block">
-          <h1 className="vis-title">{currentAlgoData.name} Visualizer</h1>
-          <p className="vis-subtitle">{currentAlgoData.shortDescription}</p>
-        </div>
+    <div className="vis-page-root">
 
-        <div className="vis-complexity-cards">
-          <div className="vis-comp-badge">
-            <Clock className="w-3.5 h-3.5 text-amber-400 inline mr-1" />
-            <span>Best: <strong>{currentAlgoData.complexity.best}</strong></span>
-          </div>
-          <div className="vis-comp-badge">
-            <Clock className="w-3.5 h-3.5 text-rose-400 inline mr-1" />
-            <span>Avg: <strong>{currentAlgoData.complexity.average}</strong></span>
-          </div>
-          <div className="vis-comp-badge">
-            <HardDrive className="w-3.5 h-3.5 text-cyan-400 inline mr-1" />
-            <span>Space: <strong>{currentAlgoData.complexity.space}</strong></span>
-          </div>
-          <div className="vis-comp-badge">
-            {currentAlgoData.stable ? (
-              <span className="text-emerald-400"><ShieldCheck className="w-3.5 h-3.5 inline mr-1" /> Stable</span>
-            ) : (
-              <span className="text-rose-400"><ShieldAlert className="w-3.5 h-3.5 inline mr-1" /> Unstable</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Controls Bar */}
-      <VisualizerControls 
+      {/* ── TOP CONTROLS ── */}
+      <VisualizerControls
         selectedAlgo={algoId}
         onSelectAlgo={onSelectAlgoId}
         isPlaying={isPlaying}
@@ -212,146 +173,206 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         isCompleted={isCompleted}
       />
 
-      {/* Workspace */}
-      <div className="visualizer-workspace-card">
-        {/* Dedicated Visualization Component */}
-        {algoId === 'heap-sort' ? (
-          <HeapSortVisualizer 
-            currentStep={currentFrame}
-            originalArray={array}
-          />
-        ) : algoId === 'quick-sort' ? (
-          <QuickSortVisualizer 
-            currentStep={currentFrame}
-            pivotStrategy={pivotStrategy}
-            onPivotStrategyChange={setPivotStrategy}
-            originalArray={array}
-          />
-        ) : algoId === 'merge-sort' ? (
-          <MergeSortVisualizer 
-            array={currentFrame ? currentFrame.arraySnapshot : array}
-            currentStep={currentFrame}
-          />
-        ) : (
-          <ArrayBars 
-            array={currentFrame ? currentFrame.array : array} 
-            currentStep={currentFrame}
-            showValues={true}
-          />
-        )}
+      {/* ── ALGORITHM HEADER STRIP ── */}
+      <div className="vis-algo-header-strip">
+        <div className="vis-algo-title-block">
+          <h1 className="vis-algo-name">{currentAlgoData.name}</h1>
+          <p className="vis-algo-desc">{currentAlgoData.shortDescription}</p>
+        </div>
+        <div className="vis-complexity-row">
+          <div className="vis-comp-chip chip-best">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Best <strong>{currentAlgoData.complexity.best}</strong></span>
+          </div>
+          <div className="vis-comp-chip chip-avg">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Avg <strong>{currentAlgoData.complexity.average}</strong></span>
+          </div>
+          <div className="vis-comp-chip chip-space">
+            <HardDrive className="w-3.5 h-3.5" />
+            <span>Space <strong>{currentAlgoData.complexity.space}</strong></span>
+          </div>
+          <div className="vis-comp-chip">
+            {currentAlgoData.stable
+              ? <span className="chip-stable"><ShieldCheck className="w-3.5 h-3.5" /> Stable</span>
+              : <span className="chip-unstable"><ShieldAlert className="w-3.5 h-3.5" /> Unstable</span>
+            }
+          </div>
+        </div>
+      </div>
 
-        {/* Non-Dedicated Auxiliary Views */}
-        {algoId !== 'merge-sort' && algoId !== 'quick-sort' && algoId !== 'heap-sort' && (
-          <>
-            {currentFrame?.countArray && currentFrame.countArray.length > 0 && (
-              <div className="count-array-view-box">
-                <span className="count-title">Frequency Count Array:</span>
-                <div className="count-values-row">
-                  {currentFrame.countArray.slice(0, 15).map((c, idx) => (
-                    <div key={idx} className="count-item">
-                      <span className="c-idx">{idx + (currentFrame.minOffset || 0)}</span>
-                      <span className="c-val">{c}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+      {/* ── MAIN SINGLE-SCREEN GRID ── */}
+      <div className={`vis-main-grid ${isDedicatedVis ? 'vis-grid-full' : 'vis-grid-split'}`}>
+
+        {/* LEFT / MAIN: Visualization Area */}
+        <div className="vis-viz-column">
+
+          {/* The actual visualization */}
+          <div className="vis-canvas-card">
+            {algoId === 'heap-sort' ? (
+              <HeapSortVisualizer
+                currentStep={currentFrame}
+                originalArray={array}
+              />
+            ) : algoId === 'quick-sort' ? (
+              <QuickSortVisualizer
+                currentStep={currentFrame}
+                pivotStrategy={pivotStrategy}
+                onPivotStrategyChange={setPivotStrategy}
+                originalArray={array}
+              />
+            ) : algoId === 'merge-sort' ? (
+              <MergeSortVisualizer
+                array={currentFrame ? currentFrame.arraySnapshot : array}
+                currentStep={currentFrame}
+              />
+            ) : (
+              <ArrayBars
+                array={currentFrame ? currentFrame.array : array}
+                currentStep={currentFrame}
+                showValues={true}
+              />
             )}
+          </div>
 
-            {currentFrame?.buckets && currentFrame.buckets.length > 0 && (
-              <div className="buckets-view-box">
-                <span className="buckets-title">Floating Buckets:</span>
-                <div className="buckets-grid">
-                  {currentFrame.buckets.map((b, bIdx) => (
-                    <div key={bIdx} className="bucket-card">
-                      <span className="bucket-num">Bucket #{bIdx + 1}</span>
-                      <span className="bucket-items">[{b.join(', ')}]</span>
-                    </div>
-                  ))}
+          {/* Auxiliary data views — counting/bucket/etc — for non-dedicated algos */}
+          {!isDedicatedVis && (
+            <>
+              {currentFrame?.countArray && currentFrame.countArray.length > 0 && (
+                <div className="vis-aux-card">
+                  <span className="vis-aux-title">Frequency Count Array</span>
+                  <div className="vis-count-row">
+                    {currentFrame.countArray.slice(0, 15).map((c, idx) => (
+                      <div key={idx} className="vis-count-cell">
+                        <span className="vis-count-idx">{idx + (currentFrame.minOffset || 0)}</span>
+                        <span className="vis-count-val">{c}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="operation-banner">
-              <div className="operation-text-box">
-                <span className="op-label">Current Action:</span>
-                <span className="op-text">{currentFrame?.description || 'Press Start to begin animation'}</span>
+              {currentFrame?.buckets && currentFrame.buckets.length > 0 && (
+                <div className="vis-aux-card">
+                  <span className="vis-aux-title">Buckets</span>
+                  <div className="vis-buckets-grid">
+                    {currentFrame.buckets.map((b, bIdx) => (
+                      <div key={bIdx} className="vis-bucket-chip">
+                        <span className="vis-bucket-num">#{bIdx + 1}</span>
+                        <span className="vis-bucket-vals">[{b.join(', ')}]</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* RIGHT: Interactive Step Panel (only for non-dedicated algos) */}
+        {!isDedicatedVis && (
+          <div className="vis-side-column">
+
+            {/* Step Action Panel */}
+            <StepActionPanel
+              currentStep={currentFrame}
+              currentStepIdx={currentStepIdx}
+              totalSteps={steps.length}
+              algoName={currentAlgoData.name}
+            />
+
+            {/* Pseudocode with live highlighting */}
+            <PseudocodeHighlight
+              algoId={algoId}
+              currentStep={currentFrame}
+            />
+
+            {/* Stats card */}
+            <div className="vis-stats-card">
+              <div className="vis-stat-row">
+                <BarChart2 className="w-4 h-4 text-amber-400" />
+                <span className="vis-stat-label">Comparisons</span>
+                <strong className="vis-stat-val text-amber-400">{currentFrame?.comparisonsCount || 0}</strong>
+              </div>
+              <div className="vis-stat-row">
+                <Layers className="w-4 h-4 text-rose-400" />
+                <span className="vis-stat-label">Swaps / Writes</span>
+                <strong className="vis-stat-val text-rose-400">{currentFrame?.swapsCount || 0}</strong>
+              </div>
+              <div className="vis-stat-row">
+                <span className="vis-stat-label">Step Progress</span>
+                <strong className="vis-stat-val">{currentStepIdx + 1} / {steps.length}</strong>
               </div>
               {currentFrame?.pass > 0 && (
-                <span className="pass-badge">Pass {currentFrame.pass}</span>
+                <div className="vis-stat-row">
+                  <span className="vis-stat-label">Current Pass</span>
+                  <strong className="vis-stat-val text-cyan-400">{currentFrame.pass}</strong>
+                </div>
               )}
-            </div>
-
-            <div className="vis-stats-bar">
-              <div className="stat-pill">
-                <BarChart2 className="w-4 h-4 text-amber-400 inline mr-1.5" />
-                <span>Comparisons: <strong>{currentFrame?.comparisonsCount || 0}</strong></span>
-              </div>
-              <div className="stat-pill">
-                <Layers className="w-4 h-4 text-rose-400 inline mr-1.5" />
-                <span>Swaps / Writes: <strong>{currentFrame?.swapsCount || 0}</strong></span>
-              </div>
-              <div className="stat-pill">
-                <span>Step Progress: <strong>{currentStepIdx + 1}</strong> / {steps.length}</span>
-              </div>
               {isCompleted && (
-                <div className="stat-pill completed-pill font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 inline mr-1" /> Array Sorted!
+                <div className="vis-completed-banner">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <span>Array Sorted!</span>
                 </div>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Floating Quick Playback Controller Dock */}
-      <div className="floating-playback-dock">
-        <div className="dock-step-badge">
+      {/* ── FLOATING PLAYBACK DOCK ── */}
+      <div className="vis-playback-dock">
+        <div className="dock-step-info">
           Step <strong className="text-amber-400">{currentStepIdx + 1}</strong> / {steps.length || 1}
         </div>
 
-        <div className="dock-buttons">
-          <button 
+        <div className="dock-btns">
+          <button
             onClick={() => setCurrentStepIdx(p => Math.max(0, p - 1))}
             disabled={isPlaying || currentStepIdx === 0}
             className="dock-btn btn-secondary"
-            title="Previous Step (Left Arrow)"
+            title="Previous Step (←)"
           >
             <SkipBack className="w-4 h-4 mr-1" /> Prev
           </button>
 
-          <button 
+          <button
             onClick={() => setIsPlaying(!isPlaying)}
             className={`dock-btn ${isPlaying ? 'btn-warning' : 'btn-primary'}`}
             disabled={isCompleted && !isPlaying}
-            title={isPlaying ? "Pause (Spacebar)" : "Start (Spacebar)"}
+            title={isPlaying ? 'Pause (Space)' : 'Start (Space)'}
           >
             {isPlaying ? <Pause className="w-4 h-4 mr-1" /> : <Play className="w-4 h-4 mr-1" />}
             {isPlaying ? 'Pause' : 'Start'}
           </button>
 
-          <button 
+          <button
             onClick={() => setCurrentStepIdx(p => Math.min(steps.length - 1, p + 1))}
             disabled={isPlaying || isCompleted}
             className="dock-btn btn-accent"
-            title="Next Step (Right Arrow)"
+            title="Next Step (→)"
           >
             Next <SkipForward className="w-4 h-4 ml-1" />
           </button>
 
-          <button 
+          <button
             onClick={() => { setCurrentStepIdx(0); setIsPlaying(false); }}
             className="dock-btn btn-icon"
-            title="Reset (Key R)"
+            title="Reset (R)"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="dock-keyboard-tip hidden lg:flex">
-          <span>Keyboard: <kbd className="dock-kbd">←</kbd> <kbd className="dock-kbd">→</kbd> <kbd className="dock-kbd">Space</kbd></span>
+        <div className="dock-keys hidden lg:flex">
+          <span>
+            <kbd className="dock-kbd">←</kbd>
+            <kbd className="dock-kbd">→</kbd>
+            <kbd className="dock-kbd">Space</kbd>
+            <kbd className="dock-kbd">R</kbd>
+          </span>
         </div>
       </div>
     </div>
   );
 }
-
