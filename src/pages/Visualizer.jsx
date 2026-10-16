@@ -6,6 +6,7 @@ import QuickSortVisualizer from '../components/QuickSortVisualizer';
 import HeapSortVisualizer from '../components/HeapSortVisualizer';
 import StepActionPanel from '../components/StepActionPanel';
 import PseudocodeHighlight from '../components/PseudocodeHighlight';
+import VisualizerErrorBoundary from '../components/VisualizerErrorBoundary';
 import { runSortingAlgorithm } from '../algorithms';
 import { ALGORITHMS } from '../data/algorithms';
 import { playTone } from '../utils/audio';
@@ -59,6 +60,16 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     generateNewArray(arraySize, presetType);
   }, [arraySize, presetType]);
 
+  // Adjust array size when switching algorithms so dedicated visualizers don't overflow
+  useEffect(() => {
+    if (algoId === 'heap-sort' && arraySize > 10) {
+      setArraySize(5);
+    } else if ((algoId === 'quick-sort' || algoId === 'merge-sort') && arraySize > 20) {
+      setArraySize(7);
+    }
+    // Don't widen automatically — only shrink if needed
+  }, [algoId]);
+
   useEffect(() => {
     if (array.length > 0) {
       const { steps: generatedSteps } = runSortingAlgorithm(algoId, array, { pivotStrategy });
@@ -71,9 +82,16 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   useEffect(() => {
     if (soundEnabled && isPlaying && steps[currentStepIdx]) {
       const step = steps[currentStepIdx];
+      // Support both indices-based (most algos) and leftCompareIdx/arraySnapshot (MergeSort)
+      let idx = null;
       if (step.indices && step.indices.length > 0) {
-        const idx = step.indices[0];
-        const val = (step.array || step.arraySnapshot)[idx] || 50;
+        idx = step.indices[0];
+      } else if (step.leftCompareIdx !== null && step.leftCompareIdx !== undefined) {
+        idx = step.leftCompareIdx;
+      }
+      if (idx !== null) {
+        const arr = step.array || step.arraySnapshot || [];
+        const val = arr[idx] || 50;
         playTone(val, 10, 100, Math.min(speed, 60));
       }
     }
@@ -160,7 +178,11 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         onReset={() => { setCurrentStepIdx(0); setIsPlaying(false); }}
         onGenerateArray={() => generateNewArray()}
         speed={speed}
-        onSpeedChange={setSpeed}
+        onSpeedChange={(newSpeed) => {
+          // Enforce 50ms minimum delay when array is large (>40 elements) to avoid frame drops
+          const minDelay = arraySize > 40 ? 50 : 10;
+          setSpeed(Math.max(minDelay, newSpeed));
+        }}
         arraySize={arraySize}
         onArraySizeChange={setArraySize}
         customInput={customInput}
@@ -171,6 +193,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         soundEnabled={soundEnabled}
         onToggleSound={() => setSoundEnabled(!soundEnabled)}
         isCompleted={isCompleted}
+        algoId={algoId}
       />
 
       {/* ── ALGORITHM HEADER STRIP ── */}
@@ -207,33 +230,38 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         {/* LEFT / MAIN: Visualization Area */}
         <div className="vis-viz-column">
 
-          {/* The actual visualization */}
-          <div className="vis-canvas-card">
-            {algoId === 'heap-sort' ? (
-              <HeapSortVisualizer
-                currentStep={currentFrame}
-                originalArray={array}
-              />
-            ) : algoId === 'quick-sort' ? (
-              <QuickSortVisualizer
-                currentStep={currentFrame}
-                pivotStrategy={pivotStrategy}
-                onPivotStrategyChange={setPivotStrategy}
-                originalArray={array}
-              />
-            ) : algoId === 'merge-sort' ? (
-              <MergeSortVisualizer
-                array={currentFrame ? currentFrame.arraySnapshot : array}
-                currentStep={currentFrame}
-              />
-            ) : (
-              <ArrayBars
-                array={currentFrame ? currentFrame.array : array}
-                currentStep={currentFrame}
-                showValues={true}
-              />
-            )}
-          </div>
+          {/* The actual visualization — wrapped in ErrorBoundary */}
+          <VisualizerErrorBoundary
+            algoId={algoId}
+            onReset={() => { setCurrentStepIdx(0); setIsPlaying(false); generateNewArray(); }}
+          >
+            <div className="vis-canvas-card">
+              {algoId === 'heap-sort' ? (
+                <HeapSortVisualizer
+                  currentStep={currentFrame}
+                  originalArray={array}
+                />
+              ) : algoId === 'quick-sort' ? (
+                <QuickSortVisualizer
+                  currentStep={currentFrame}
+                  pivotStrategy={pivotStrategy}
+                  onPivotStrategyChange={setPivotStrategy}
+                  originalArray={array}
+                />
+              ) : algoId === 'merge-sort' ? (
+                <MergeSortVisualizer
+                  array={currentFrame ? currentFrame.arraySnapshot : array}
+                  currentStep={currentFrame}
+                />
+              ) : (
+                <ArrayBars
+                  array={currentFrame ? currentFrame.array : array}
+                  currentStep={currentFrame}
+                  showValues={true}
+                />
+              )}
+            </div>
+          </VisualizerErrorBoundary>
 
           {/* Auxiliary data views — counting/bucket/etc — for non-dedicated algos */}
           {!isDedicatedVis && (

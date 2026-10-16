@@ -124,7 +124,9 @@ export default function HeapSortVisualizer({ currentStep, originalArray = [] }) 
           {/* 2. Synchronized Binary Heap Tree Display */}
           <div className="hs-tree-card">
             <h4 className="hs-card-subheading">Synchronized Binary Heap Tree</h4>
-            <div className="hs-tree-nodes-container">
+
+            {/* Render each level row, plus SVG connectors between levels */}
+            <div className="hs-tree-wrapper">
               {levels.map((levelNodes, lvlIdx) => (
                 <div key={lvlIdx} className="hs-tree-level-row">
                   {levelNodes.map((node) => (
@@ -133,6 +135,17 @@ export default function HeapSortVisualizer({ currentStep, originalArray = [] }) 
                       className={`hs-tree-node status-${node.status}`}
                       title={`Index ${node.idx}: Value ${node.val}`}
                     >
+                      {/* SVG upward connector line to parent (for non-root nodes) */}
+                      {lvlIdx > 0 && (
+                        <svg className="hs-node-connector" viewBox="0 0 40 24" preserveAspectRatio="none">
+                          <line
+                            x1="20" y1="24" x2="20" y2="0"
+                            stroke={node.idx === leftChildIdx ? '#60a5fa' : node.idx === rightChildIdx ? '#fb923c' : '#475569'}
+                            strokeWidth="2"
+                            strokeDasharray={node.idx === activeParentIdx ? '4 2' : 'none'}
+                          />
+                        </svg>
+                      )}
                       <div className="tree-val">{node.val}</div>
                       <div className="tree-idx">idx: {node.idx}</div>
 
@@ -198,7 +211,7 @@ export default function HeapSortVisualizer({ currentStep, originalArray = [] }) 
               <div className={`code-line ${codeLine === 2 ? 'active-line' : ''}`}>
                 <span className="line-num">2</span> &nbsp;&nbsp;BUILD_MAX_HEAP(A)
               </div>
-              <div className={`code-line ${codeLine === 4 ? 'active-line' : ''}`}>
+              <div className={`code-line ${codeLine === 3 ? 'active-line' : ''}`}>
                 <span className="line-num">3</span> &nbsp;&nbsp;for i = n-1 down to 1:
               </div>
               <div className={`code-line ${codeLine === 4 ? 'active-line' : ''}`}>

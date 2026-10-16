@@ -188,7 +188,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
         pivotVal: mainArr[high],
         pointerI: low - 1,
         pointerJ: low,
-        codeLine: 4, // "p = PARTITION(A, low, high)"
+        codeLine: 3, // "p = PARTITION(A, low, high)"
         description: `Pivot Strategy (${pivotStrategy.toUpperCase()}): Moved selected pivot ${mainArr[high]} to end index ${high}`,
         treeStructure: getTreeSnapshot(),
         comparisonsCount,
@@ -210,7 +210,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
       pivotVal: pivotVal,
       pointerI: low - 1,
       pointerJ: low,
-      codeLine: 4,
+      codeLine: 3, // "p = PARTITION(A, low, high)"
       description: `PIVOT SELECTED: Pivot = ${pivotVal} at index ${high} for partition range [${low}..${high}]`,
       treeStructure: getTreeSnapshot(),
       comparisonsCount,
@@ -230,7 +230,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
       pivotVal: pivotVal,
       pointerI: i,
       pointerJ: low,
-      codeLine: 4,
+      codeLine: 4, // "i = low - 1; partition loop starts"
       description: `Initialized partition pointers: i = ${i} (boundary of elements < pivot) and j = ${low} (current scanner)`,
       treeStructure: getTreeSnapshot(),
       comparisonsCount,
@@ -254,7 +254,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
         pointerI: i,
         pointerJ: j,
         comparedValues: { currentVal, pivotVal, isLess: currentVal < pivotVal },
-        codeLine: 4,
+        codeLine: 5, // "if A[j] <= pivot"
         description: `Comparing Current element A[j=${j}] (${currentVal}) with Pivot (${pivotVal}): ${currentVal} ${currentVal < pivotVal ? '<' : '>='} ${pivotVal}`,
         treeStructure: getTreeSnapshot(),
         comparisonsCount,
@@ -266,6 +266,9 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
         i++;
         if (i !== j) {
           swapsCount++;
+          // Capture pre-swap values for accurate description
+          const preSwapI = mainArr[i];
+          const preSwapJ = mainArr[j];
           const temp = mainArr[i];
           mainArr[i] = mainArr[j];
           mainArr[j] = temp;
@@ -281,10 +284,10 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
             pointerI: i,
             pointerJ: j,
             swappedIndices: [i, j],
-            swappedValues: [mainArr[i], mainArr[j]],
+            swappedValues: [preSwapI, preSwapJ],
             comparedValues: { currentVal, pivotVal, isLess: true },
-            codeLine: 4,
-            description: `${currentVal} < ${pivotVal} → Move i forward to ${i} and swap A[i] (${mainArr[i]}) with A[j] (${mainArr[j]})`,
+            codeLine: 6, // "i++; swap(A[i], A[j])"
+            description: `${currentVal} < ${pivotVal} → Move i to ${i}. Swapped A[i]=${preSwapI} ↔ A[j]=${preSwapJ}.`,
             treeStructure: getTreeSnapshot(),
             comparisonsCount,
             swapsCount,
@@ -302,7 +305,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
             pointerI: i,
             pointerJ: j,
             comparedValues: { currentVal, pivotVal, isLess: true },
-            codeLine: 4,
+            codeLine: 6, // "i++; already in place"
             description: `${currentVal} < ${pivotVal} → Move i forward to ${i}. Element already in correct left partition.`,
             treeStructure: getTreeSnapshot(),
             comparisonsCount,
@@ -322,7 +325,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
           pointerI: i,
           pointerJ: j,
           comparedValues: { currentVal, pivotVal, isLess: false },
-          codeLine: 4,
+          codeLine: 5, // "if A[j] <= pivot" (condition false → no swap)
           description: `${currentVal} >= pivot (${pivotVal}) → No swap. Move scanner j to next element.`,
           treeStructure: getTreeSnapshot(),
           comparisonsCount,
@@ -353,7 +356,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
       pointerI: finalPivotIdx,
       pointerJ: high,
       swappedIndices: [high, finalPivotIdx],
-      codeLine: 4,
+      codeLine: 7, // "swap(A[i+1], pivot)  ← place pivot"
       description: `Placing Pivot ${pivotVal} into its final sorted index ${finalPivotIdx}. Swapped index ${high} with index ${finalPivotIdx}.`,
       treeStructure: getTreeSnapshot(),
       comparisonsCount,
@@ -371,7 +374,7 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
       pivotVal: pivotVal,
       leftPartition: [...leftPartition],
       rightPartition: [...rightPartition],
-      codeLine: 4,
+      codeLine: 8, // "Recurse on left & right partitions"
       description: `Partition Complete for range [${low}..${high}]: Left (Less) = [${leftPartition.join(', ')}], Pivot = ${pivotVal}, Right (Greater) = [${rightPartition.join(', ')}]`,
       treeStructure: getTreeSnapshot(),
       comparisonsCount,

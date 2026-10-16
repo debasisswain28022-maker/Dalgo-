@@ -148,7 +148,7 @@ export default function MergeSortVisualizer({ currentStep, array }) {
                     {leftArray.length > 0 ? (
                       leftArray.map((val, idx) => {
                         const isComparing = idx === leftCompareIdx;
-                        const isTaken = idx < leftCompareIdx;
+                        const isTaken = leftCompareIdx !== null && idx < leftCompareIdx;
                         return (
                           <div 
                             key={idx} 
@@ -185,7 +185,7 @@ export default function MergeSortVisualizer({ currentStep, array }) {
                     {rightArray.length > 0 ? (
                       rightArray.map((val, idx) => {
                         const isComparing = idx === rightCompareIdx;
-                        const isTaken = idx < rightCompareIdx;
+                        const isTaken = rightCompareIdx !== null && idx < rightCompareIdx;
                         return (
                           <div 
                             key={idx} 
@@ -250,27 +250,51 @@ export default function MergeSortVisualizer({ currentStep, array }) {
             </div>
           </div>
 
-          {/* 3. Pseudocode Highlight Card */}
-          <div className="qs-panel-card code-panel font-mono">
-            <h4 className="qs-panel-title font-sans">MERGE SORT PSEUDOCODE</h4>
-            <div className="pseudocode-lines">
-              <div className={`code-line ${phase === 'DIVIDING' ? 'active-line' : ''}`}>
-                <span className="line-num">1</span> MERGE_SORT(A, low, high)
+          {/* 3. Pseudocode Highlight Card — per-line highlighting via step type */}
+          {(() => {
+            const stepType = currentStep?.type || '';
+            // Line 1: function header — fires on init and any split (we're in MERGE_SORT)
+            const line1 = ['init', 'split', 'base_case'].includes(stepType);
+            // Line 2: compute mid — fires on split (dividing into halves)
+            const line2 = stepType === 'split';
+            // Line 3: MERGE_SORT left — fires on first recursive split
+            const line3 = stepType === 'split';
+            // Line 4: MERGE_SORT right — fires on second recursive split
+            const line4 = stepType === 'split' || stepType === 'base_case';
+            // Line 5: MERGE call — fires during all merge-phase steps
+            const line5 = ['start_merge', 'compare', 'take_left', 'take_right',
+                           'append_remaining', 'merge_complete'].includes(stepType);
+            // Line 6: done — fires on completed
+            const line6 = stepType === 'completed';
+            return (
+              <div className="qs-panel-card code-panel font-mono">
+                <h4 className="qs-panel-title font-sans">MERGE SORT PSEUDOCODE</h4>
+                <div className="pseudocode-lines">
+                  <div className={`code-line ${line1 ? 'active-line' : ''}`}>
+                    <span className="line-num">1</span> MERGE_SORT(A, low, high)
+                  </div>
+                  <div className={`code-line ${line2 ? 'active-line' : ''}`}>
+                    <span className="line-num">2</span> &nbsp;&nbsp;mid = floor((low + high) / 2)
+                  </div>
+                  <div className={`code-line ${line3 ? 'active-line' : ''}`}>
+                    <span className="line-num">3</span> &nbsp;&nbsp;MERGE_SORT(A, low, mid)
+                  </div>
+                  <div className={`code-line ${line4 ? 'active-line' : ''}`}>
+                    <span className="line-num">4</span> &nbsp;&nbsp;MERGE_SORT(A, mid + 1, high)
+                  </div>
+                  <div className={`code-line ${line5 ? 'active-line' : ''}`}>
+                    <span className="line-num">5</span> &nbsp;&nbsp;MERGE(A, low, mid, high)
+                  </div>
+                  <div className={`code-line ${line5 && stepType === 'compare' ? 'active-line' : ''}`}>
+                    <span className="line-num">6</span> &nbsp;&nbsp;&nbsp;&nbsp;compare &amp; pick smaller element
+                  </div>
+                  <div className={`code-line ${line6 ? 'active-line' : ''}`}>
+                    <span className="line-num">7</span> DONE ✓
+                  </div>
+                </div>
               </div>
-              <div className={`code-line ${phase === 'DIVIDING' ? 'active-line' : ''}`}>
-                <span className="line-num">2</span> &nbsp;&nbsp;mid = floor((low + high) / 2)
-              </div>
-              <div className={`code-line ${phase === 'DIVIDING' ? 'active-line' : ''}`}>
-                <span className="line-num">3</span> &nbsp;&nbsp;MERGE_SORT(A, low, mid)
-              </div>
-              <div className={`code-line ${phase === 'DIVIDING' ? 'active-line' : ''}`}>
-                <span className="line-num">4</span> &nbsp;&nbsp;MERGE_SORT(A, mid + 1, high)
-              </div>
-              <div className={`code-line ${phase === 'MERGING' || phase === 'BASE CASE' ? 'active-line' : ''}`}>
-                <span className="line-num">5</span> &nbsp;&nbsp;MERGE(A, low, mid, high)
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* 4. Statistics Footer */}
           <div className="merge-stats-footer">

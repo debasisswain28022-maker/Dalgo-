@@ -22,9 +22,14 @@ export default function VisualizerControls({
   onPresetChange,
   soundEnabled,
   onToggleSound,
-  isCompleted
+  isCompleted,
+  algoId = ''
 }) {
   const [inputError, setInputError] = useState('');
+
+  // Cap array size for algorithms with constrained visualizers
+  const maxArraySize = algoId === 'heap-sort' ? 15 : (algoId === 'quick-sort' || algoId === 'merge-sort') ? 20 : 80;
+  const sizeCapped = maxArraySize < 80;
 
   const handleApplyCustom = (e) => {
     e.preventDefault();
@@ -190,13 +195,16 @@ export default function VisualizerControls({
             <input 
               type="range"
               min="5"
-              max="80"
-              value={arraySize}
+              max={maxArraySize}
+              value={Math.min(arraySize, maxArraySize)}
               onChange={(e) => onArraySizeChange(Number(e.target.value))}
               className="range-slider"
             />
-            <span className="slider-max-label">Large</span>
+            <span className="slider-max-label">{sizeCapped ? `Max ${maxArraySize}` : 'Large'}</span>
           </div>
+          {sizeCapped && (
+            <p className="slider-cap-hint">⚠ Size limited to {maxArraySize} for {algoId === 'heap-sort' ? 'tree readability' : 'diagram clarity'}</p>
+          )}
         </div>
 
         {/* Audio Toggle */}

@@ -36,6 +36,36 @@ const STEP_TYPE_META = {
   bucket_concat:   { icon: Layers,         label: 'Concat Buckets',  color: 'step-insert' },
   count_increment: { icon: Hash,           label: 'Count',           color: 'step-key' },
   count_prefix:    { icon: BarChart2,      label: 'Prefix Sum',      color: 'step-gap' },
+  // QuickSort-specific
+  recursive_call:      { icon: GitCompare,     label: 'Recurse',         color: 'step-pass' },
+  swap_pivot_to_end:   { icon: ArrowLeftRight, label: 'Move Pivot',      color: 'step-pivot' },
+  select_pivot:        { icon: AlertCircle,    label: 'Select Pivot',    color: 'step-pivot' },
+  pointer_init:        { icon: ChevronRight,   label: 'Init Pointers',   color: 'step-init' },
+  no_swap:             { icon: GitCompare,     label: 'No Swap',         color: 'step-compare' },
+  no_swap_same_index:  { icon: GitCompare,     label: 'Already Left',    color: 'step-compare' },
+  base_case_element:   { icon: CheckCircle2,   label: 'Base Case',       color: 'step-sorted' },
+  partition_complete:  { icon: Package,        label: 'Partition Done',  color: 'step-pivot' },
+  swap_pivot:          { icon: ArrowLeftRight, label: 'Place Pivot',     color: 'step-swap' },
+  // MergeSort-specific
+  split:           { icon: GitCompare,     label: 'Split',           color: 'step-pass' },
+  base_case:       { icon: CheckCircle2,   label: 'Base Case',       color: 'step-sorted' },
+  start_merge:     { icon: Layers,         label: 'Start Merge',     color: 'step-key' },
+  take_left:       { icon: ArrowDown,      label: 'Take Left',       color: 'step-insert' },
+  take_right:      { icon: ArrowDown,      label: 'Take Right',      color: 'step-insert' },
+  append_remaining:{ icon: ChevronRight,   label: 'Append Rest',     color: 'step-insert' },
+  merge_complete:  { icon: CheckCircle2,   label: 'Merge Done',      color: 'step-sorted' },
+  // HeapSort-specific
+  build_heap_start:         { icon: Layers,         label: 'Build Heap',      color: 'step-pass' },
+  max_heap_created:         { icon: CheckCircle2,   label: 'Max Heap Built',  color: 'step-sorted' },
+  extract_max_start:        { icon: Search,         label: 'Extract Max',     color: 'step-min' },
+  swap_root_with_last:      { icon: ArrowLeftRight, label: 'Swap Root',       color: 'step-swap' },
+  reduce_heap_size:         { icon: TrendingDown,   label: 'Shrink Heap',     color: 'step-gap' },
+  heapify_start:            { icon: BarChart2,      label: 'Heapify',         color: 'step-compare' },
+  inspect_parent_children:  { icon: BarChart2,      label: 'Inspect Node',    color: 'step-compare' },
+  compare_left:             { icon: GitCompare,     label: 'Compare Left',    color: 'step-compare' },
+  compare_right:            { icon: GitCompare,     label: 'Compare Right',   color: 'step-compare' },
+  heapify_swap:             { icon: ArrowLeftRight, label: 'Heapify Swap',    color: 'step-swap' },
+  heapify_complete_node:    { icon: CheckCircle2,   label: 'Node OK',         color: 'step-sorted' },
 };
 
 const DEFAULT_META = { icon: PlayCircle, label: 'Step', color: 'step-init' };

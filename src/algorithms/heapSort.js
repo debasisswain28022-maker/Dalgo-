@@ -118,7 +118,7 @@ export function generateHeapSortSteps(initialArray) {
       sortedIndices: [...sortedIndices],
       activeParentIdx: 0,
       lastIdx: i,
-      codeLine: 4, // "swap A[0] and A[i]"
+      codeLine: 3, // "for i = n-1 down to 1"
       description: `PHASE 2: Root element A[0] (${maxVal}) is the largest in the heap. Swapping root with last heap element A[${i}] (${lastVal}).`,
       comparisonsCount,
       swapsCount,

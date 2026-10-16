@@ -61,7 +61,7 @@ export default function ArrayBars({ array, currentStep, showValues = true }) {
       <div className="array-bars-container">
         {array.map((value, index) => {
           const status = getBarStatus(index);
-          const heightPercent = Math.max(8, Math.round((value / maxVal) * 100));
+          const heightPercent = Math.max(8, Math.round(((value - minVal) / Math.max(maxVal - minVal, 1)) * 100));
 
           return (
             <div

@@ -4758,3 +4758,229 @@ code, pre {
   box-shadow: 0 0 12px rgba(251, 146, 60, 0.7);
 }
 
+/* ==========================================================================
+   QUICKSORT — NESTED RECURSION TREE
+   ========================================================================== */
+.qs-tree-graph-nested {
+  padding: 8px 4px;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 340px;
+}
+
+.qs-tree-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.qs-tree-node-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-family: 'Fira Code', monospace;
+  border: 1.5px solid transparent;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.qs-tree-node-box.node-active {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: #6366f1;
+  color: #a5b4fc;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.25);
+}
+
+.qs-tree-node-box.node-done {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+.node-range-tag {
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.67rem;
+}
+
+.node-values-tag {
+  color: #e2e8f0;
+  font-size: 0.72rem;
+}
+
+.node-pivot-tag {
+  background: rgba(167, 139, 250, 0.2);
+  border: 1px solid #7c3aed;
+  color: #c4b5fd;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* Children container — indented beneath parent with left border connector */
+.qs-tree-children {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+  padding-left: 20px;
+  border-left: 2px solid rgba(99, 102, 241, 0.3);
+  margin-left: 16px;
+}
+
+.qs-tree-child-wrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Horizontal connector tick from left border to node */
+.qs-tree-connector {
+  width: 12px;
+  height: 2px;
+  background: rgba(99, 102, 241, 0.3);
+  margin-left: -12px;
+  margin-top: 13px;
+  margin-bottom: -13px;
+  align-self: flex-start;
+}
+
+/* ==========================================================================
+   HEAPSORT — SVG CONNECTOR LINES + WRAPPER
+   ========================================================================== */
+.hs-tree-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+/* SVG connector above non-root nodes */
+.hs-node-connector {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 24px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Make tree nodes position:relative so the SVG connector is positioned correctly */
+.hs-tree-node {
+  position: relative;
+}
+
+/* ==========================================================================
+   VISUALIZER ERROR BOUNDARY
+   ========================================================================== */
+.vis-error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: 24px;
+}
+
+.vis-error-card {
+  background: rgba(17, 24, 39, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 16px;
+  padding: 32px 40px;
+  text-align: center;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.1);
+}
+
+.vis-error-icon {
+  width: 48px;
+  height: 48px;
+  color: #f87171;
+  margin: 0 auto 16px;
+  display: block;
+  animation: errorPulse 2s ease-in-out infinite;
+}
+
+@keyframes errorPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(0.95); }
+}
+
+.vis-error-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f87171;
+  margin-bottom: 10px;
+}
+
+.vis-error-desc {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.vis-error-detail {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.75rem;
+  color: #fca5a5;
+  text-align: left;
+  margin-bottom: 14px;
+  font-family: 'Fira Code', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.vis-error-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.vis-error-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+.vis-error-retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+}
+
+/* ==========================================================================
+   ARRAY SIZE SLIDER — CAP HINT
+   ========================================================================== */
+.slider-cap-hint {
+  font-size: 0.72rem;
+  color: #f59e0b;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.85;
+}
+

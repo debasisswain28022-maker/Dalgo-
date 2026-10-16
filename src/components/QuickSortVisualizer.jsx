@@ -1,5 +1,37 @@
 import React from 'react';
-import { ArrowDown, CheckCircle2, ShieldCheck, HelpCircle, GitFork, Cpu, Layers, Check } from 'lucide-react';
+import { ArrowDown, CheckCircle2, HelpCircle, GitFork, Check } from 'lucide-react';
+
+/**
+ * Recursive component that renders a QuickSort recursion tree node
+ * with its children indented beneath it.
+ */
+function QsTreeNode({ nodeId, nodeMap }) {
+  if (!nodeId || !nodeMap.has(nodeId)) return null;
+  const node = nodeMap.get(nodeId);
+  const isCompleted = node.status === 'completed';
+
+  return (
+    <div className="qs-tree-branch">
+      <div className={`qs-tree-node-box ${isCompleted ? 'node-done' : 'node-active'}`}>
+        <span className="node-range-tag">Range [{node.range[0]}‥{node.range[1]}]</span>
+        <span className="node-values-tag">[{node.values.join(', ')}]</span>
+        {node.pivotVal !== null && (
+          <span className="node-pivot-tag">P={node.pivotVal}</span>
+        )}
+      </div>
+      {node.children && node.children.length > 0 && (
+        <div className="qs-tree-children">
+          {node.children.map(childId => (
+            <div key={childId} className="qs-tree-child-wrapper">
+              <div className="qs-tree-connector" />
+              <QsTreeNode nodeId={childId} nodeMap={nodeMap} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function QuickSortVisualizer({
   currentStep,
@@ -190,30 +222,28 @@ export default function QuickSortVisualizer({
             </div>
           )}
 
-          {/* 3. Recursion Tree Visual Graph */}
-          {treeStructure.length > 0 && (
-            <div className="qs-recursion-tree-card">
-              <div className="qs-tree-header">
-                <h4 className="qs-card-subheading"><GitFork className="w-4 h-4 text-indigo-400 inline mr-1.5" /> Recursion Tree</h4>
-                <span className="qs-tree-count">{treeStructure.length} Nodes</span>
+          {/* 3. Recursion Tree Visual Graph — Nested recursive render */}
+          {treeStructure.length > 0 && (() => {
+            // Build nodeMap from flat snapshot for O(1) lookup in recursive component
+            const nodeMap = new Map();
+            treeStructure.forEach(n => nodeMap.set(n.id, n));
+            const root = treeStructure.find(n => !treeStructure.some(other =>
+              other.children && other.children.includes(n.id)
+            ));
+            return (
+              <div className="qs-recursion-tree-card">
+                <div className="qs-tree-header">
+                  <h4 className="qs-card-subheading">
+                    <GitFork className="w-4 h-4 text-indigo-400 inline mr-1.5" /> Recursion Tree
+                  </h4>
+                  <span className="qs-tree-count">{treeStructure.length} Nodes</span>
+                </div>
+                <div className="qs-tree-graph-nested">
+                  {root && <QsTreeNode nodeId={root.id} nodeMap={nodeMap} />}
+                </div>
               </div>
-
-              <div className="qs-tree-graph">
-                {treeStructure.map(node => (
-                  <div
-                    key={node.id}
-                    className={`qs-tree-node ${node.status === 'completed' ? 'completed' : 'active'}`}
-                  >
-                    <span className="node-range">Range [{node.range[0]}..{node.range[1]}]</span>
-                    <span className="node-values">[{node.values.join(', ')}]</span>
-                    {node.pivotVal !== null && (
-                      <span className="node-pivot">Pivot = {node.pivotVal}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* RIGHT COLUMN: Logic, Pseudocode & Explanation */}
@@ -237,14 +267,26 @@ export default function QuickSortVisualizer({
               <div className={`code-line ${codeLine === 2 ? 'active-line' : ''}`}>
                 <span className="line-num">2</span> &nbsp;&nbsp;if low &lt; high then
               </div>
-              <div className={`code-line ${codeLine === 4 ? 'active-line' : ''}`}>
+              <div className={`code-line ${codeLine === 3 ? 'active-line' : ''}`}>
                 <span className="line-num">3</span> &nbsp;&nbsp;&nbsp;&nbsp;p = PARTITION(A, low, high)
               </div>
+              <div className={`code-line ${codeLine === 4 ? 'active-line' : ''}`}>
+                <span className="line-num">4</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i = low - 1 &nbsp;← boundary ptr
+              </div>
               <div className={`code-line ${codeLine === 5 ? 'active-line' : ''}`}>
-                <span className="line-num">4</span> &nbsp;&nbsp;&nbsp;&nbsp;QUICK_SORT(A, low, p - 1)
+                <span className="line-num">5</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if A[j] &lt;= pivot:
               </div>
               <div className={`code-line ${codeLine === 6 ? 'active-line' : ''}`}>
-                <span className="line-num">5</span> &nbsp;&nbsp;&nbsp;&nbsp;QUICK_SORT(A, p + 1, high)
+                <span className="line-num">6</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++; swap(A[i], A[j])
+              </div>
+              <div className={`code-line ${codeLine === 7 ? 'active-line' : ''}`}>
+                <span className="line-num">7</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;swap(A[i+1], pivot) ← place pivot
+              </div>
+              <div className={`code-line ${codeLine === 8 ? 'active-line' : ''}`}>
+                <span className="line-num">8</span> &nbsp;&nbsp;&nbsp;&nbsp;Recurse on left &amp; right partitions
+              </div>
+              <div className={`code-line ${codeLine === 9 ? 'active-line' : ''}`}>
+                <span className="line-num">9</span> DONE ✓
               </div>
             </div>
           </div>
