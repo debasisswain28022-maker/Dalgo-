@@ -178,13 +178,43 @@ export default function Compare({ onSelectAlgorithm, onNavigate }) {
             const runner = runnerState[id];
             const currentFrame = runner?.steps[runner.currentIdx] || null;
 
+            // Normalize array: Merge Sort uses arraySnapshot, others use array
+            const displayArray = currentFrame
+              ? (currentFrame.array ?? currentFrame.arraySnapshot ?? sharedArray)
+              : sharedArray;
+
+            // Normalize currentStep for ArrayBars: Merge Sort steps lack `indices`/`sortedIndices`
+            // Map activeRange into indices so bars get highlighted during merge phases
+            let normalizedStep = currentFrame;
+            if (currentFrame && !currentFrame.indices && currentFrame.arraySnapshot) {
+              // Merge Sort: build indices from activeRange for highlight
+              const activeIndices = [];
+              if (currentFrame.activeRange) {
+                for (let k = currentFrame.activeRange[0]; k <= currentFrame.activeRange[1]; k++) {
+                  activeIndices.push(k);
+                }
+              }
+              normalizedStep = {
+                ...currentFrame,
+                array: currentFrame.arraySnapshot,
+                indices: activeIndices,
+                sortedIndices: currentFrame.phase === 'COMPLETED'
+                  ? displayArray.map((_, i) => i)
+                  : [],
+                type: currentFrame.type === 'compare' ? 'compare'
+                    : currentFrame.type === 'take_left' || currentFrame.type === 'take_right' ? 'overwrite'
+                    : currentFrame.type === 'merge_complete' ? 'sorted_element'
+                    : currentFrame.type
+              };
+            }
+
             // Calculate live comparisons & swaps
             let comps = 0;
             let swaps = 0;
             if (runner && runner.steps) {
               for (let i = 0; i <= runner.currentIdx && i < runner.steps.length; i++) {
                 if (runner.steps[i].type === 'compare') comps++;
-                if (['swap', 'heap_swap', 'shift', 'overwrite'].includes(runner.steps[i].type)) swaps++;
+                if (['swap', 'heap_swap', 'shift', 'overwrite', 'take_left', 'take_right', 'append_remaining'].includes(runner.steps[i].type)) swaps++;
               }
             }
 
@@ -199,8 +229,8 @@ export default function Compare({ onSelectAlgorithm, onNavigate }) {
 
                 <div className="benchmark-bars-area">
                   <ArrayBars 
-                    array={currentFrame ? currentFrame.array : sharedArray}
-                    currentStep={currentFrame}
+                    array={displayArray}
+                    currentStep={normalizedStep}
                     showValues={benchmarkSize <= 30}
                   />
                 </div>
