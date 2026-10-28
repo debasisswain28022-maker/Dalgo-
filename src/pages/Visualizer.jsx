@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import VisualizerControls from '../components/VisualizerControls';
 import ArrayBars from '../components/ArrayBars';
 import MergeSortVisualizer from '../components/MergeSortVisualizer';
@@ -18,25 +18,64 @@ import {
 // Algorithms that have their own dedicated visualizers (with built-in panels)
 const DEDICATED_VIS_ALGOS = new Set(['heap-sort', 'quick-sort', 'merge-sort']);
 
+// ── localStorage helpers ──────────────────────────────────────────────────────
+const LS_KEY = 'dalgo_vis_prefs';
+
+function loadPrefs() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function savePrefs(prefs) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(prefs));
+  } catch {
+    // Storage unavailable — silently ignore
+  }
+}
+
+// ── Helper to clamp array size per algo ──────────────────────────────────────
+function clampSizeForAlgo(size, id) {
+  if (id === 'heap-sort') return Math.min(size, 15);
+  if (id === 'quick-sort' || id === 'merge-sort') return Math.min(size, 20);
+  return size;
+}
+
 export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   const algoId = selectedAlgoId || 'bubble-sort';
   const currentAlgoData = ALGORITHMS.find(a => a.id === algoId) || ALGORITHMS[0];
 
-  const [arraySize, setArraySize] = useState(
-    algoId === 'heap-sort' ? 5 : algoId === 'quick-sort' || algoId === 'merge-sort' ? 7 : 20
-  );
-  const [speed, setSpeed] = useState(300);
-  const [presetType, setPresetType] = useState('random');
+  // ── Load persisted preferences on mount ────────────────────────────────────
+  const savedPrefs = loadPrefs();
+
+  const [arraySize, setArraySize] = useState(() => {
+    const saved = savedPrefs.arraySize ?? 20;
+    return clampSizeForAlgo(saved, algoId);
+  });
+
+  const [speed, setSpeed] = useState(savedPrefs.speed ?? 300);
+  const [presetType, setPresetType] = useState(savedPrefs.presetType ?? 'random');
   const [customInput, setCustomInput] = useState('');
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const [pivotStrategy, setPivotStrategy] = useState('last');
+  const [soundEnabled, setSoundEnabled] = useState(savedPrefs.soundEnabled ?? false);
+  const [pivotStrategy, setPivotStrategy] = useState(savedPrefs.pivotStrategy ?? 'last');
+  const [vizTheme, setVizTheme] = useState(savedPrefs.vizTheme ?? 'dark');
 
   const [array, setArray] = useState([]);
   const [steps, setSteps] = useState([]);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const generateNewArray = (size = arraySize, preset = presetType) => {
+  // ── Persist preferences whenever they change ───────────────────────────────
+  useEffect(() => {
+    savePrefs({ arraySize, speed, presetType, soundEnabled, pivotStrategy, vizTheme });
+  }, [arraySize, speed, presetType, soundEnabled, pivotStrategy, vizTheme]);
+
+  // ── Array generation ───────────────────────────────────────────────────────
+  const generateNewArray = useCallback((size = arraySize, preset = presetType) => {
     let newArr = [];
     if (preset === 'random') {
       newArr = Array.from({ length: size }, () => Math.floor(Math.random() * 90) + 10);
@@ -54,22 +93,19 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     }
     setArray(newArr);
     setIsPlaying(false);
-  };
+  }, [arraySize, presetType]);
 
   useEffect(() => {
     generateNewArray(arraySize, presetType);
   }, [arraySize, presetType]);
 
-  // Adjust array size when switching algorithms so dedicated visualizers don't overflow
+  // ── Clamp array size when switching algorithms ─────────────────────────────
   useEffect(() => {
-    if (algoId === 'heap-sort' && arraySize > 10) {
-      setArraySize(5);
-    } else if ((algoId === 'quick-sort' || algoId === 'merge-sort') && arraySize > 20) {
-      setArraySize(7);
-    }
-    // Don't widen automatically — only shrink if needed
+    const clamped = clampSizeForAlgo(arraySize, algoId);
+    if (clamped !== arraySize) setArraySize(clamped);
   }, [algoId]);
 
+  // ── Generate sorting steps when array or algo changes ─────────────────────
   useEffect(() => {
     if (array.length > 0) {
       const { steps: generatedSteps } = runSortingAlgorithm(algoId, array, { pivotStrategy });
@@ -79,10 +115,10 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     }
   }, [algoId, array, pivotStrategy]);
 
+  // ── Sound effect ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (soundEnabled && isPlaying && steps[currentStepIdx]) {
       const step = steps[currentStepIdx];
-      // Support both indices-based (most algos) and leftCompareIdx/arraySnapshot (MergeSort)
       let idx = null;
       if (step.indices && step.indices.length > 0) {
         idx = step.indices[0];
@@ -97,6 +133,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     }
   }, [currentStepIdx, isPlaying, soundEnabled, speed, steps]);
 
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (
@@ -142,6 +179,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [steps.length, currentStepIdx]);
 
+  // ── Playback timer ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isPlaying || steps.length === 0) return;
     if (currentStepIdx >= steps.length - 1) {
@@ -164,8 +202,17 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     setPresetType('custom');
   };
 
+  const handleToggleVizTheme = () => {
+    setVizTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleSpeedChange = (newSpeed) => {
+    const minDelay = arraySize > 40 ? 50 : 10;
+    setSpeed(Math.max(minDelay, newSpeed));
+  };
+
   return (
-    <div className="vis-page-root">
+    <div className={`vis-page-root vis-theme-${vizTheme}`}>
 
       {/* ── TOP CONTROLS ── */}
       <VisualizerControls
@@ -178,11 +225,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         onReset={() => { setCurrentStepIdx(0); setIsPlaying(false); }}
         onGenerateArray={() => generateNewArray()}
         speed={speed}
-        onSpeedChange={(newSpeed) => {
-          // Enforce 50ms minimum delay when array is large (>40 elements) to avoid frame drops
-          const minDelay = arraySize > 40 ? 50 : 10;
-          setSpeed(Math.max(minDelay, newSpeed));
-        }}
+        onSpeedChange={handleSpeedChange}
         arraySize={arraySize}
         onArraySizeChange={setArraySize}
         customInput={customInput}
@@ -194,6 +237,8 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         onToggleSound={() => setSoundEnabled(!soundEnabled)}
         isCompleted={isCompleted}
         algoId={algoId}
+        vizTheme={vizTheme}
+        onToggleVizTheme={handleToggleVizTheme}
       />
 
       {/* ── ALGORITHM HEADER STRIP ── */}

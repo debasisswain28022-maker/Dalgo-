@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { Play, Pause, SkipForward, SkipBack, RotateCcw, Shuffle, Volume2, VolumeX, Sparkles, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Play, Pause, SkipForward, SkipBack, RotateCcw, Shuffle,
+  Volume2, VolumeX, Settings, X, Sun, Moon, ChevronDown
+} from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
 
 export default function VisualizerControls({
@@ -23,20 +26,50 @@ export default function VisualizerControls({
   soundEnabled,
   onToggleSound,
   isCompleted,
-  algoId = ''
+  algoId = '',
+  vizTheme,
+  onToggleVizTheme,
 }) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [inputError, setInputError] = useState('');
+  const settingsPanelRef = useRef(null);
+  const settingsBtnRef = useRef(null);
 
   // Cap array size for algorithms with constrained visualizers
   const maxArraySize = algoId === 'heap-sort' ? 15 : (algoId === 'quick-sort' || algoId === 'merge-sort') ? 20 : 80;
   const sizeCapped = maxArraySize < 80;
+
+  // Close settings when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        settingsOpen &&
+        settingsPanelRef.current &&
+        !settingsPanelRef.current.contains(e.target) &&
+        settingsBtnRef.current &&
+        !settingsBtnRef.current.contains(e.target)
+      ) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [settingsOpen]);
+
+  // Close settings on Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && settingsOpen) setSettingsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [settingsOpen]);
 
   const handleApplyCustom = (e) => {
     e.preventDefault();
     setInputError('');
     if (!customInput.trim()) return;
 
-    // Validate format like "5, 2, 8, 1, 4"
     const parsed = customInput
       .split(',')
       .map(s => s.trim())
@@ -47,195 +80,261 @@ export default function VisualizerControls({
       setInputError('Please enter valid comma-separated numbers (e.g. "5, 2, 8, 1, 4")');
       return;
     }
-
     if (parsed.length < 2 || parsed.length > 100) {
       setInputError('Array size must be between 2 and 100 numbers.');
       return;
     }
-
     onApplyCustomArray(parsed);
+    setSettingsOpen(false);
+  };
+
+  const PRESET_LABELS = {
+    'random': 'Random',
+    'nearly-sorted': 'Nearly Sorted',
+    'reversed': 'Reversed',
+    'few-unique': 'Few Unique',
   };
 
   return (
     <div className="controls-card">
-      {/* Top Bar: Algorithm Dropdown & Primary Play Controls */}
-      <div className="controls-main-row">
-        {/* Algorithm Select Dropdown */}
-        <div className="control-group algo-select-group">
-          <label htmlFor="algo-select" className="control-label">Algorithm</label>
-          <select 
-            id="algo-select"
-            value={selectedAlgo}
-            onChange={(e) => onSelectAlgo(e.target.value)}
-            className="algo-dropdown"
-          >
-            <optgroup label="Beginner">
-              {ALGORITHMS.filter(a => a.category === 'Beginner').map(a => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Intermediate">
-              {ALGORITHMS.filter(a => a.category === 'Intermediate').map(a => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Advanced">
-              {ALGORITHMS.filter(a => a.category === 'Advanced').map(a => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
+      {/* ── MAIN TOOLBAR ROW ── */}
+      <div className="controls-toolbar">
 
-        {/* Action Buttons */}
-        <div className="btn-group-primary">
-          <button 
-            onClick={onGenerateArray}
-            className="btn btn-secondary"
-            title="Generate Random Array"
-          >
-            <Shuffle className="w-4 h-4" />
-            <span>Generate Array</span>
-          </button>
-
-          <button 
-            onClick={onTogglePlay}
-            className={`btn ${isPlaying ? 'btn-warning' : 'btn-primary'}`}
-            disabled={isCompleted && !isPlaying}
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="w-4 h-4" />
-                <span>Pause</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                <span>Start</span>
-              </>
-            )}
-          </button>
-
-          <button 
-            onClick={onStepBackward}
-            className="btn btn-icon"
-            disabled={isPlaying}
-            title="Previous Step"
-          >
-            <SkipBack className="w-4 h-4" />
-          </button>
-
-          <button 
-            onClick={onStepForward}
-            className="btn btn-icon"
-            disabled={isPlaying || isCompleted}
-            title="Next Step"
-          >
-            <SkipForward className="w-4 h-4" />
-          </button>
-
-          <button 
-            onClick={onReset}
-            className="btn btn-icon btn-reset"
-            title="Reset Animation"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Sliders & Presets Row */}
-      <div className="controls-secondary-row">
-        {/* Preset Selector */}
-        <div className="control-group">
-          <label className="control-label">Array Preset</label>
-          <div className="preset-pill-group">
-            {['random', 'nearly-sorted', 'reversed', 'few-unique'].map((type) => (
-              <button
-                key={type}
-                className={`preset-pill ${presetType === type ? 'active' : ''}`}
-                onClick={() => onPresetChange(type)}
-              >
-                {type.replace('-', ' ')}
-              </button>
-            ))}
+        {/* Algorithm selector */}
+        <div className="ctrl-algo-group">
+          <label htmlFor="algo-select" className="ctrl-micro-label">Algorithm</label>
+          <div className="ctrl-select-wrapper">
+            <select
+              id="algo-select"
+              value={selectedAlgo}
+              onChange={(e) => onSelectAlgo(e.target.value)}
+              className="algo-dropdown"
+            >
+              <optgroup label="Beginner">
+                {ALGORITHMS.filter(a => a.category === 'Beginner').map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Intermediate">
+                {ALGORITHMS.filter(a => a.category === 'Intermediate').map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Advanced">
+                {ALGORITHMS.filter(a => a.category === 'Advanced').map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </optgroup>
+            </select>
+            <ChevronDown className="ctrl-select-chevron" />
           </div>
         </div>
 
-        {/* Speed Slider */}
-        <div className="control-group slider-group">
-          <div className="slider-header">
-            <span className="control-label">Speed</span>
-            <span className="slider-value">{Math.round(1000 / speed)} steps/s</span>
+        {/* Speed slider (inline, compact) */}
+        <div className="ctrl-speed-group">
+          <div className="ctrl-speed-header">
+            <label className="ctrl-micro-label">Speed</label>
+            <span className="ctrl-speed-val">{Math.round(1000 / speed)}×</span>
           </div>
-          <div className="slider-input-wrapper">
-            <span className="slider-min-label">Slow</span>
-            <input 
+          <div className="ctrl-speed-row">
+            <span className="ctrl-speed-end-label">Slow</span>
+            <input
               type="range"
               min="10"
               max="800"
               step="10"
-              // Invert value so slider right = faster (lower delay ms)
               value={810 - speed}
               onChange={(e) => onSpeedChange(810 - Number(e.target.value))}
-              className="range-slider"
+              className="range-slider ctrl-range"
+              title={`Animation speed: ${Math.round(1000 / speed)} steps/sec`}
             />
-            <span className="slider-max-label">Fast</span>
+            <span className="ctrl-speed-end-label">Fast</span>
           </div>
         </div>
 
-        {/* Size Slider */}
-        <div className="control-group slider-group">
-          <div className="slider-header">
-            <span className="control-label">Array Size</span>
-            <span className="slider-value">{arraySize} items</span>
-          </div>
-          <div className="slider-input-wrapper">
-            <span className="slider-min-label">Small</span>
-            <input 
-              type="range"
-              min="5"
-              max={maxArraySize}
-              value={Math.min(arraySize, maxArraySize)}
-              onChange={(e) => onArraySizeChange(Number(e.target.value))}
-              className="range-slider"
-            />
-            <span className="slider-max-label">{sizeCapped ? `Max ${maxArraySize}` : 'Large'}</span>
-          </div>
-          {sizeCapped && (
-            <p className="slider-cap-hint">⚠ Size limited to {maxArraySize} for {algoId === 'heap-sort' ? 'tree readability' : 'diagram clarity'}</p>
-          )}
-        </div>
-
-        {/* Audio Toggle */}
-        <div className="control-group sound-group">
-          <label className="control-label">Audio</label>
-          <button 
-            onClick={onToggleSound}
-            className={`btn-sound-toggle ${soundEnabled ? 'enabled' : 'disabled'}`}
-            title={soundEnabled ? "Mute Tone Sound" : "Enable Pitch Tone Sound"}
+        {/* Playback controls */}
+        <div className="ctrl-playback-group">
+          <button
+            onClick={onGenerateArray}
+            className="btn btn-secondary ctrl-btn"
+            title="Generate new random array (G)"
           >
-            {soundEnabled ? <Volume2 className="w-5 h-5 text-emerald-400" /> : <VolumeX className="w-5 h-5 text-slate-400" />}
-            <span>{soundEnabled ? "Audio On" : "Muted"}</span>
+            <Shuffle className="w-4 h-4" />
+            <span className="ctrl-btn-label">New</span>
+          </button>
+
+          <button
+            onClick={onStepBackward}
+            className="btn btn-icon ctrl-btn"
+            disabled={isPlaying}
+            title="Step back (←)"
+            aria-label="Step backward"
+          >
+            <SkipBack className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={onTogglePlay}
+            className={`btn ctrl-btn ctrl-play-btn ${isPlaying ? 'btn-warning' : 'btn-primary'}`}
+            disabled={isCompleted && !isPlaying}
+            title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+          >
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            <span className="ctrl-btn-label">{isPlaying ? 'Pause' : 'Play'}</span>
+          </button>
+
+          <button
+            onClick={onStepForward}
+            className="btn btn-icon ctrl-btn"
+            disabled={isPlaying || isCompleted}
+            title="Step forward (→)"
+            aria-label="Step forward"
+          >
+            <SkipForward className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={onReset}
+            className="btn btn-icon ctrl-btn btn-reset"
+            title="Reset (R)"
+            aria-label="Reset animation"
+          >
+            <RotateCcw className="w-4 h-4" />
           </button>
         </div>
-      </div>
 
-      {/* Custom Input Form Row */}
-      <div className="controls-custom-input-row">
-        <form onSubmit={handleApplyCustom} className="custom-input-form">
-          <label htmlFor="custom-array-input" className="control-label font-medium">Custom Array Input:</label>
-          <input 
-            id="custom-array-input"
-            type="text" 
-            placeholder="e.g. 5, 2, 8, 1, 4"
-            value={customInput}
-            onChange={(e) => onCustomInputChange(e.target.value)}
-            className="custom-text-input"
-          />
-          <button type="submit" className="btn btn-sm btn-accent">Apply Array</button>
-        </form>
-        {inputError && <div className="custom-input-error">{inputError}</div>}
+        {/* Settings gear button */}
+        <div className="ctrl-settings-anchor">
+          <button
+            ref={settingsBtnRef}
+            onClick={() => setSettingsOpen(prev => !prev)}
+            className={`btn ctrl-btn ctrl-settings-btn ${settingsOpen ? 'active' : ''}`}
+            title="Visualization settings"
+            aria-expanded={settingsOpen}
+            aria-haspopup="true"
+          >
+            <Settings className={`w-4 h-4 ${settingsOpen ? 'ctrl-gear-spin' : ''}`} />
+            <span className="ctrl-btn-label">Settings</span>
+          </button>
+
+          {/* ── SETTINGS POPOVER ── */}
+          {settingsOpen && (
+            <div
+              ref={settingsPanelRef}
+              className="ctrl-settings-panel"
+              role="dialog"
+              aria-label="Visualization settings panel"
+            >
+              <div className="ctrl-panel-header">
+                <span className="ctrl-panel-title">
+                  <Settings className="w-3.5 h-3.5" />
+                  Visualization Settings
+                </span>
+                <button
+                  onClick={() => setSettingsOpen(false)}
+                  className="ctrl-panel-close"
+                  aria-label="Close settings"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Array Size */}
+              <div className="ctrl-panel-section">
+                <div className="ctrl-panel-label-row">
+                  <span className="ctrl-panel-label">Array Size</span>
+                  <span className="ctrl-panel-value">{arraySize} items</span>
+                </div>
+                <div className="ctrl-panel-slider-row">
+                  <span className="ctrl-speed-end-label">5</span>
+                  <input
+                    type="range"
+                    min="5"
+                    max={maxArraySize}
+                    value={Math.min(arraySize, maxArraySize)}
+                    onChange={(e) => onArraySizeChange(Number(e.target.value))}
+                    className="range-slider ctrl-range"
+                  />
+                  <span className="ctrl-speed-end-label">{maxArraySize}</span>
+                </div>
+                {sizeCapped && (
+                  <p className="ctrl-panel-hint">⚠ Limited to {maxArraySize} for {algoId === 'heap-sort' ? 'tree readability' : 'diagram clarity'}</p>
+                )}
+              </div>
+
+              {/* Array Preset */}
+              <div className="ctrl-panel-section">
+                <span className="ctrl-panel-label">Array Pattern</span>
+                <div className="ctrl-preset-grid">
+                  {['random', 'nearly-sorted', 'reversed', 'few-unique'].map((type) => (
+                    <button
+                      key={type}
+                      className={`ctrl-preset-pill ${presetType === type ? 'active' : ''}`}
+                      onClick={() => onPresetChange(type)}
+                    >
+                      {PRESET_LABELS[type]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Array Input */}
+              <div className="ctrl-panel-section">
+                <span className="ctrl-panel-label">Custom Array</span>
+                <form onSubmit={handleApplyCustom} className="ctrl-custom-form">
+                  <input
+                    type="text"
+                    placeholder="e.g. 5, 2, 8, 1, 4"
+                    value={customInput}
+                    onChange={(e) => onCustomInputChange(e.target.value)}
+                    className="ctrl-custom-input"
+                    aria-label="Custom array values"
+                  />
+                  <button type="submit" className="btn btn-sm btn-accent">Apply</button>
+                </form>
+                {inputError && <p className="ctrl-panel-error">{inputError}</p>}
+              </div>
+
+              {/* Divider */}
+              <div className="ctrl-panel-divider" />
+
+              {/* Sound & Theme Row */}
+              <div className="ctrl-panel-section ctrl-panel-toggles">
+                {/* Sound toggle */}
+                <div className="ctrl-toggle-item">
+                  <span className="ctrl-panel-label">Sound</span>
+                  <button
+                    onClick={onToggleSound}
+                    className={`ctrl-toggle-btn ${soundEnabled ? 'ctrl-toggle-on' : 'ctrl-toggle-off'}`}
+                    title={soundEnabled ? 'Mute audio' : 'Enable audio'}
+                  >
+                    {soundEnabled
+                      ? <Volume2 className="w-4 h-4" />
+                      : <VolumeX className="w-4 h-4" />
+                    }
+                    <span>{soundEnabled ? 'On' : 'Off'}</span>
+                  </button>
+                </div>
+
+                {/* Viz theme toggle */}
+                <div className="ctrl-toggle-item">
+                  <span className="ctrl-panel-label">Viz Theme</span>
+                  <button
+                    onClick={onToggleVizTheme}
+                    className={`ctrl-toggle-btn ${vizTheme === 'dark' ? 'ctrl-toggle-on' : 'ctrl-toggle-off'}`}
+                    title={`Switch to ${vizTheme === 'dark' ? 'light' : 'dark'} visualization theme`}
+                  >
+                    {vizTheme === 'dark'
+                      ? <Moon className="w-4 h-4" />
+                      : <Sun className="w-4 h-4" />
+                    }
+                    <span>{vizTheme === 'dark' ? 'Dark' : 'Light'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
