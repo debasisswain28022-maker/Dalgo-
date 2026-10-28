@@ -5,6 +5,13 @@ An interactive, modern web application built with **React** and **Vite** designe
 ![Sorting Algorithm Visualizer](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)
 ![Deployment](https://img.shields.io/badge/Hosted%20On-GitHub%20Pages-22c55e?logo=github)
+[![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Dalgo-6366f1?style=flat-square)](https://debasisswain28022-maker.github.io/Dalgo-/)
+
+---
+
+## 🌐 Live Demo
+
+> **[https://debasisswain28022-maker.github.io/Dalgo-/](https://debasisswain28022-maker.github.io/Dalgo-/)**
 
 ---
 
@@ -43,10 +50,10 @@ An interactive, modern web application built with **React** and **Vite** designe
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/sorting-algorithm-visualizer.git
+git clone https://github.com/debasisswain28022-maker/Dalgo-.git
 
 # Navigate to project directory
-cd sorting-algorithm-visualizer
+cd Dalgo-
 
 # Install dependencies
 npm install
@@ -59,8 +66,10 @@ npm run dev
 
 ## 📦 Deployment
 
+The app is live at: **[https://debasisswain28022-maker.github.io/Dalgo-/](https://debasisswain28022-maker.github.io/Dalgo-/)**
+
 This repository includes a GitHub Actions workflow that automatically deploys the app to **GitHub Pages** whenever code is pushed to the `main` branch.
 
-To enable GitHub Pages:
+To enable GitHub Pages on your own fork:
 1. Go to repository **Settings** -> **Pages**.
 2. Set **Source** to **GitHub Actions**.
