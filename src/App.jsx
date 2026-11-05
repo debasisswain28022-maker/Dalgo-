@@ -7,14 +7,20 @@ import Visualizer from './pages/Visualizer';
 import Compare from './pages/Compare';
 import QuizPage from './pages/QuizPage';
 import AlgorithmDetails from './pages/AlgorithmDetails';
+import GreedyDPPage from './greedy-dp/GreedyDPPage';
 import './index.css';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedAlgoId, setSelectedAlgoId] = useState('bubble-sort');
+  const [selectedGreedyAlgoId, setSelectedGreedyAlgoId] = useState('fractional-knapsack');
 
   const handleSelectAlgorithm = (algoId) => {
     setSelectedAlgoId(algoId);
+  };
+
+  const handleSelectGreedyAlgorithm = (algoId) => {
+    setSelectedGreedyAlgoId(algoId);
   };
 
   return (
@@ -24,6 +30,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onSelectAlgorithm={handleSelectAlgorithm}
+        onSelectGreedyAlgorithm={handleSelectGreedyAlgorithm}
       />
 
       {/* Main View Router */}
@@ -32,6 +39,7 @@ export default function App() {
           <Home 
             onNavigate={setActiveTab}
             onSelectAlgorithm={handleSelectAlgorithm}
+            onSelectGreedyAlgorithm={handleSelectGreedyAlgorithm}
           />
         )}
 
@@ -39,6 +47,15 @@ export default function App() {
           <Algorithms 
             onNavigate={setActiveTab}
             onSelectAlgorithm={handleSelectAlgorithm}
+            onSelectGreedyAlgorithm={handleSelectGreedyAlgorithm}
+          />
+        )}
+
+        {activeTab === 'greedy-dp' && (
+          <GreedyDPPage 
+            selectedAlgoId={selectedGreedyAlgoId}
+            onSelectAlgoId={setSelectedGreedyAlgoId}
+            onNavigate={setActiveTab}
           />
         )}
 

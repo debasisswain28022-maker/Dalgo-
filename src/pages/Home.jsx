@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Play, BookOpen, Eye, Cpu, MousePointer, HelpCircle, ArrowRight, Sparkles, Zap, CheckCircle } from 'lucide-react';
+import { Play, BookOpen, Eye, Cpu, MousePointer, HelpCircle, ArrowRight, Sparkles, Zap, Package, Binary, Calendar, Grid } from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
+import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import ArrayBars from '../components/ArrayBars';
 import { runSortingAlgorithm } from '../algorithms';
 
-export default function Home({ onNavigate, onSelectAlgorithm }) {
+export default function Home({ onNavigate, onSelectAlgorithm, onSelectGreedyAlgorithm }) {
   // Live Mini-Preview State
   const [previewAlgo, setPreviewAlgo] = useState('bubble-sort');
   const [previewArray, setPreviewArray] = useState([45, 12, 85, 32, 67, 19, 90, 54, 28, 71]);
@@ -62,6 +63,12 @@ export default function Home({ onNavigate, onSelectAlgorithm }) {
             className="btn btn-lg btn-primary shadow-glow"
           >
             <Play className="w-5 h-5 mr-2" /> Start Visualizer
+          </button>
+          <button 
+            onClick={() => onNavigate('greedy-dp')} 
+            className="btn btn-lg btn-secondary shadow-glow border-amber-500/40 text-amber-300 hover:bg-amber-500/10"
+          >
+            <Sparkles className="w-5 h-5 mr-2 text-amber-400" /> Greedy & DP
           </button>
           <button 
             onClick={() => onNavigate('algorithms')} 
@@ -193,6 +200,59 @@ export default function Home({ onNavigate, onSelectAlgorithm }) {
               </ul>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Featured Greedy & Dynamic Programming Section */}
+      <section className="catalog-preview-section">
+        <div className="section-header">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Optimization & Subproblems</span>
+          </div>
+          <h2 className="section-title">Greedy Algorithms & Dynamic Programming</h2>
+          <p className="section-subtitle">
+            Master interval scheduling, optimal prefix codes, ratio packing, and string alignment with step-by-step interactive animations
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          {GREEDY_DP_ALGORITHMS.map((algo) => {
+            const Icon = algo.id === 'fractional-knapsack' ? Package :
+                         algo.id === 'huffman-coding' ? Binary :
+                         algo.id === 'activity-selection' ? Calendar : Grid;
+            return (
+              <div
+                key={algo.id}
+                className="category-column cursor-pointer hover:border-indigo-500/60 transition-all group"
+                onClick={() => {
+                  if (onSelectGreedyAlgorithm) onSelectGreedyAlgorithm(algo.id);
+                  onNavigate('greedy-dp');
+                }}
+              >
+                <div className="category-col-header">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-slate-200">{algo.name}</span>
+                  </div>
+                  <span className="category-badge badge-advanced">{algo.badge}</span>
+                </div>
+
+                <p className="text-xs text-slate-400 my-2 leading-relaxed line-clamp-2">
+                  {algo.shortDescription}
+                </p>
+
+                <div className="flex items-center justify-between text-xs font-mono text-slate-400 pt-2 border-t border-slate-800">
+                  <span>Avg: {algo.complexity.timeAverage}</span>
+                  <span className="text-indigo-400 group-hover:translate-x-1 transition-transform flex items-center">
+                    Launch <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

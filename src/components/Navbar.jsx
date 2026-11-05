@@ -1,19 +1,32 @@
 import React, { useState } from 'react';
-import { BarChart3, BookOpen, Layers, GitCompare, HelpCircle, Menu, X, Search } from 'lucide-react';
+import { BarChart3, BookOpen, Layers, GitCompare, HelpCircle, Menu, X, Search, Sparkles } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { ALGORITHMS } from '../data/algorithms';
+import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 
-export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm }) {
+export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm, onSelectGreedyAlgorithm }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const filteredAlgorithms = searchQuery.trim()
+  const lowerQuery = searchQuery.trim().toLowerCase();
+
+  const filteredSortingAlgos = lowerQuery
     ? ALGORITHMS.filter(algo => 
-        algo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        algo.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        algo.name.toLowerCase().includes(lowerQuery) ||
+        algo.category.toLowerCase().includes(lowerQuery)
+      ).map(a => ({ ...a, type: 'sorting' }))
     : [];
+
+  const filteredGreedyDpAlgos = lowerQuery
+    ? GREEDY_DP_ALGORITHMS.filter(algo =>
+        algo.name.toLowerCase().includes(lowerQuery) ||
+        algo.category.toLowerCase().includes(lowerQuery) ||
+        algo.tagline.toLowerCase().includes(lowerQuery)
+      ).map(a => ({ ...a, type: 'greedy-dp' }))
+    : [];
+
+  const allSearchResults = [...filteredSortingAlgos, ...filteredGreedyDpAlgos];
 
   const handleNavClick = (tabId) => {
     setActiveTab(tabId);
@@ -21,9 +34,14 @@ export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSelectSearchResult = (algoId) => {
-    onSelectAlgorithm(algoId);
-    setActiveTab('algorithm-details');
+  const handleSelectSearchResult = (algo) => {
+    if (algo.type === 'greedy-dp') {
+      if (onSelectGreedyAlgorithm) onSelectGreedyAlgorithm(algo.id);
+      setActiveTab('greedy-dp');
+    } else {
+      onSelectAlgorithm(algo.id);
+      setActiveTab('algorithm-details');
+    }
     setSearchOpen(false);
     setSearchQuery('');
     setMobileMenuOpen(false);
@@ -57,6 +75,13 @@ export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm }) {
           >
             <BookOpen className="nav-icon" />
             Algorithms
+          </button>
+          <button 
+            className={`nav-link ${activeTab === 'greedy-dp' ? 'active' : ''}`}
+            onClick={() => handleNavClick('greedy-dp')}
+          >
+            <Sparkles className="nav-icon text-amber-400" />
+            Greedy & DP
           </button>
           <button 
             className={`nav-link ${activeTab === 'visualizer' ? 'active' : ''}`}
@@ -105,21 +130,23 @@ export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm }) {
                   className="search-input"
                 />
                 <div className="search-results">
-                  {filteredAlgorithms.length > 0 ? (
-                    filteredAlgorithms.map(algo => (
+                  {allSearchResults.length > 0 ? (
+                    allSearchResults.map(algo => (
                       <div 
-                        key={algo.id}
+                        key={`${algo.type}-${algo.id}`}
                         className="search-item"
-                        onClick={() => handleSelectSearchResult(algo.id)}
+                        onClick={() => handleSelectSearchResult(algo)}
                       >
                         <div className="search-item-title">{algo.name}</div>
-                        <div className="search-item-badge">{algo.category}</div>
+                        <div className="search-item-badge">
+                          {algo.type === 'greedy-dp' ? (algo.category || 'Greedy & DP') : algo.category}
+                        </div>
                       </div>
                     ))
                   ) : searchQuery.trim() ? (
                     <div className="search-no-results">No algorithm found</div>
                   ) : (
-                    <div className="search-hint">Type algorithm name</div>
+                    <div className="search-hint">Type algorithm name (e.g. Knapsack, Huffman, Quick)</div>
                   )}
                 </div>
               </div>
@@ -153,6 +180,12 @@ export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm }) {
             onClick={() => handleNavClick('algorithms')}
           >
             Algorithms Catalog
+          </button>
+          <button 
+            className={`mobile-nav-link ${activeTab === 'greedy-dp' ? 'active' : ''}`}
+            onClick={() => handleNavClick('greedy-dp')}
+          >
+            Greedy & DP Algorithms
           </button>
           <button 
             className={`mobile-nav-link ${activeTab === 'visualizer' ? 'active' : ''}`}
