@@ -436,6 +436,41 @@ export default function KnapsackVisualizer() {
             </div>
           </div>
 
+          {/* Visual Cargo Shelf showing items state */}
+          <div className="gdp-cargo-shelf mb-4">
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              Item Warehouse Status:
+            </div>
+            <div className="gdp-cargo-shelf-grid">
+              {currentFrame.items.map((item) => {
+                const isSelected = item.status === 'full' || item.status === 'partial';
+                const isRejected = item.status === 'rejected';
+                const isEvaluating = currentFrame.activeItemIdx !== null && currentFrame.items[currentFrame.activeItemIdx]?.id === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    className={`gdp-cargo-card ${isSelected ? 'cargo-selected' : ''} ${isRejected ? 'cargo-rejected' : ''} ${isEvaluating ? 'cargo-evaluating' : ''}`}
+                  >
+                    <div className="gdp-cargo-id">{item.id}</div>
+                    <div className="gdp-cargo-name">{item.name}</div>
+                    <div className="gdp-cargo-details">
+                      <span>{item.weight}kg</span> • <span>${item.value}</span>
+                    </div>
+                    {item.ratio !== null && (
+                      <div className="gdp-cargo-ratio">${item.ratio.toFixed(2)}/kg</div>
+                    )}
+                    <div className="gdp-cargo-badge">
+                      {item.status === 'full' && '✓ 100% Taken'}
+                      {item.status === 'partial' && `⚡ ${(item.fraction * 100).toFixed(0)}% Fraction`}
+                      {item.status === 'rejected' && '✗ Rejected (0%)'}
+                      {(!item.status || item.status === 'pending' || item.status === 'calculating' || item.status === 'comparing') && 'Waiting'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Visual Container Representation */}
           <div className="gdp-knapsack-bucket-wrapper">
             <div className="gdp-bucket-header">
@@ -448,19 +483,19 @@ export default function KnapsackVisualizer() {
               {currentFrame.knapsackContents && currentFrame.knapsackContents.length > 0 ? (
                 <div className="gdp-bucket-stack">
                   {currentFrame.knapsackContents.map((kc, idx) => {
-                    const segmentHeight = (kc.weightTaken / currentCapacity) * 100;
+                    const segmentHeightPx = Math.max(36, Math.round((kc.weightTaken / currentCapacity) * 170));
                     return (
                       <div
                         key={idx}
                         className={`gdp-bucket-segment gdp-segment-${kc.status}`}
-                        style={{ height: `${Math.max(14, segmentHeight)}%` }}
+                        style={{ height: `${segmentHeightPx}px`, flexShrink: 0 }}
                         title={`${kc.name}: ${kc.weightTaken}kg for $${kc.valueGained} (${(kc.fraction * 100).toFixed(1)}%)`}
                       >
                         <div className="gdp-segment-info">
                           <span className="gdp-segment-title">{kc.name}</span>
                           <span className="gdp-segment-details">
                             {kc.weightTaken}kg • ${kc.valueGained.toFixed(1)}
-                            {kc.status === 'partial' && ` (${(kc.fraction * 100).toFixed(0)}%)`}
+                            {kc.status === 'partial' && ` (${(kc.fraction * 100).toFixed(0)}% taken)`}
                           </span>
                         </div>
                       </div>

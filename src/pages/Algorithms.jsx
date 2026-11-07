@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import AlgorithmCard from '../components/AlgorithmCard';
+import '../greedy-dp/styles/greedy-dp.css';
 import { Search, Sparkles, Layers, BookOpen, Clock, HardDrive, ArrowRight, Play } from 'lucide-react';
 
 export default function Algorithms({ onNavigate, onSelectAlgorithm, onSelectGreedyAlgorithm }) {

@@ -218,24 +218,26 @@ export default function HuffmanVisualizer() {
     if (!node || node.isLeaf) return null;
     const edges = [];
     if (node.left) {
+      const midX = (node.x + node.left.x) / 2;
+      const midY = (node.y + node.left.y) / 2;
       edges.push(
-        <g key={`edge-l-${node.id}`}>
+        <g key={`edge-l-${node.id}-${node.left.id}`}>
           <line
-            x1={`${node.x}%`}
+            x1={node.x}
             y1={node.y}
-            x2={`${node.left.x}%`}
+            x2={node.left.x}
             y2={node.left.y}
             className="gdp-tree-edge"
           />
           <circle
-            cx={`${(node.x + node.left.x) / 2}%`}
-            cy={(node.y + node.left.y) / 2}
-            r="11"
+            cx={midX}
+            cy={midY}
+            r={10}
             className="gdp-edge-badge-bg"
           />
           <text
-            x={`${(node.x + node.left.x) / 2}%`}
-            y={(node.y + node.left.y) / 2 + 4}
+            x={midX}
+            y={midY + 4}
             className="gdp-edge-label"
           >
             0
@@ -245,24 +247,26 @@ export default function HuffmanVisualizer() {
       );
     }
     if (node.right) {
+      const midX = (node.x + node.right.x) / 2;
+      const midY = (node.y + node.right.y) / 2;
       edges.push(
-        <g key={`edge-r-${node.id}`}>
+        <g key={`edge-r-${node.id}-${node.right.id}`}>
           <line
-            x1={`${node.x}%`}
+            x1={node.x}
             y1={node.y}
-            x2={`${node.right.x}%`}
+            x2={node.right.x}
             y2={node.right.y}
             className="gdp-tree-edge"
           />
           <circle
-            cx={`${(node.x + node.right.x) / 2}%`}
-            cy={(node.y + node.right.y) / 2}
-            r="11"
+            cx={midX}
+            cy={midY}
+            r={10}
             className="gdp-edge-badge-bg"
           />
           <text
-            x={`${(node.x + node.right.x) / 2}%`}
-            y={(node.y + node.right.y) / 2 + 4}
+            x={midX}
+            y={midY + 4}
             className="gdp-edge-label"
           >
             1
@@ -280,35 +284,35 @@ export default function HuffmanVisualizer() {
     return (
       <g key={`node-${node.id}`}>
         <circle
-          cx={`${node.x}%`}
+          cx={node.x}
           cy={node.y}
-          r={isLeaf ? 22 : 18}
+          r={isLeaf ? 20 : 16}
           className={`gdp-tree-node-circle ${isLeaf ? 'node-leaf' : 'node-internal'}`}
         />
         <text
-          x={`${node.x}%`}
-          y={node.y - (isLeaf ? 2 : -4)}
+          x={node.x}
+          y={node.y + (isLeaf ? -2 : 4)}
           className={`gdp-tree-node-text ${isLeaf ? 'text-char' : 'text-freq'}`}
         >
           {isLeaf ? (node.char === ' ' ? '␣' : node.char) : node.freq}
         </text>
         {isLeaf && (
-          <text x={`${node.x}%`} y={node.y + 12} className="gdp-tree-node-subtext">
-            freq: {node.freq}
+          <text x={node.x} y={node.y + 11} className="gdp-tree-node-subtext">
+            f:{node.freq}
           </text>
         )}
         {/* Binary code tag below leaf node */}
         {isLeaf && node.code && (
           <g>
             <rect
-              x={`calc(${node.x}% - 22px)`}
-              y={node.y + 26}
-              width="44"
-              height="18"
-              rx="4"
+              x={node.x - 20}
+              y={node.y + 24}
+              width={40}
+              height={16}
+              rx={4}
               className="gdp-code-tag-bg"
             />
-            <text x={`${node.x}%`} y={node.y + 39} className="gdp-tree-node-code">
+            <text x={node.x} y={node.y + 36} className="gdp-tree-node-code">
               {node.code}
             </text>
           </g>
@@ -319,7 +323,7 @@ export default function HuffmanVisualizer() {
     );
   };
 
-  const activeTree = currentFrame.root || root;
+  const activeTree = currentFrame.root || currentFrame.activeSubtree || null;
 
   return (
     <div className="gdp-vis-wrapper">
@@ -550,7 +554,7 @@ export default function HuffmanVisualizer() {
 
           <div className="gdp-tree-svg-container">
             {activeTree ? (
-              <svg className="gdp-tree-svg" viewBox="0 0 100 320" preserveAspectRatio="none">
+              <svg className="gdp-tree-svg" viewBox="0 0 740 360" preserveAspectRatio="xMidYMid meet">
                 {renderTreeEdges(activeTree)}
                 {renderTreeNodes(activeTree)}
               </svg>

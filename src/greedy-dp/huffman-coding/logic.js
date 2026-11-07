@@ -49,8 +49,8 @@ export function assignCodes(node, currentCode = '', codesMap = {}) {
   return codesMap;
 }
 
-// Compute tree layout coordinates (x: 0..100, y: depth) for SVG rendering
-export function layoutTree(root) {
+// Compute tree layout coordinates (x, y in pixels) for crisp SVG rendering
+export function layoutTree(root, svgWidth = 740, svgHeight = 360) {
   if (!root) return null;
 
   function countLeaves(node) {
@@ -59,17 +59,17 @@ export function layoutTree(root) {
     return countLeaves(node.left) + countLeaves(node.right);
   }
 
-  function assignPositions(node, depth = 0, leftBoundary = 0, width = 100) {
+  function assignPositions(node, depth = 0, leftBoundary = 40, width = svgWidth - 80) {
     if (!node) return;
     const leaves = countLeaves(node);
     node.depth = depth;
-    node.y = 40 + depth * 65;
+    node.y = 45 + depth * 65;
 
     if (node.isLeaf) {
-      node.x = leftBoundary + width / 2;
+      node.x = Math.round(leftBoundary + width / 2);
     } else {
       const leftLeaves = countLeaves(node.left) || 1;
-      const leftWidth = (leftLeaves / leaves) * width;
+      const leftWidth = (leftLeaves / Math.max(1, leaves)) * width;
       const rightWidth = width - leftWidth;
 
       assignPositions(node.left, depth + 1, leftBoundary, leftWidth);
@@ -77,11 +77,11 @@ export function layoutTree(root) {
 
       const leftX = node.left ? node.left.x : leftBoundary;
       const rightX = node.right ? node.right.x : leftBoundary + width;
-      node.x = (leftX + rightX) / 2;
+      node.x = Math.round((leftX + rightX) / 2);
     }
   }
 
-  assignPositions(root, 0, 5, 90);
+  assignPositions(root, 0, 40, svgWidth - 80);
   return root;
 }
 
@@ -198,6 +198,7 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
   // Step 4: Iterative Greedy Merging
   let pq = [...nodes];
   let mergeRound = 1;
+  let lastSubtree = null;
 
   while (pq.length > 1) {
     // Extract first minimum (left child)
@@ -209,6 +210,7 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [min1.id],
       root: null,
+      activeSubtree: lastSubtree,
       codes: {},
       originalText,
       encodedText: '',
@@ -226,6 +228,7 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [min1.id, min2.id],
       root: null,
+      activeSubtree: lastSubtree,
       codes: {},
       originalText,
       encodedText: '',
@@ -238,12 +241,17 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     const parentFreq = min1.freq + min2.freq;
     const parent = createNode(null, parentFreq, min1, min2);
 
+    const subtreeLayout = JSON.parse(JSON.stringify(parent));
+    layoutTree(subtreeLayout, 740, 360);
+    lastSubtree = subtreeLayout;
+
     steps.push({
       type: 'merge_nodes',
       frequencies: JSON.parse(JSON.stringify(frequencies)),
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [parent.id, min1.id, min2.id],
       root: null,
+      activeSubtree: subtreeLayout,
       codes: {},
       originalText,
       encodedText: '',
@@ -262,6 +270,7 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [parent.id],
       root: null,
+      activeSubtree: subtreeLayout,
       codes: {},
       originalText,
       encodedText: '',

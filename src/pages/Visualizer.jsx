@@ -11,6 +11,7 @@ import { runSortingAlgorithm } from '../algorithms';
 import { ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import GreedyDPPage from '../greedy-dp/GreedyDPPage';
+import '../greedy-dp/styles/greedy-dp.css';
 import { playTone } from '../utils/audio';
 import {
   Clock, HardDrive, BarChart2, CheckCircle2, ShieldCheck, ShieldAlert,

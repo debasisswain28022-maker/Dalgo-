@@ -312,77 +312,84 @@ export default function ActivityVisualizer() {
           </div>
 
           <div className="gdp-timeline-container">
-            {/* Horizontal Time Axis Header */}
-            <div className="gdp-time-axis">
-              {timeTicks.map((tick) => (
-                <div
-                  key={tick}
-                  className="gdp-time-tick"
-                  style={{ left: `${(tick / maxTimeline) * 100}%` }}
-                >
-                  <span className="gdp-tick-label">{tick}</span>
-                  <div className="gdp-tick-line"></div>
-                </div>
-              ))}
-            </div>
-
-            {/* Current Resource Finish Time Boundary Line */}
-            {currentFrame.currentFinishTime > 0 && (
-              <div
-                className="gdp-finish-marker-line"
-                style={{ left: `${(currentFrame.currentFinishTime / maxTimeline) * 100}%` }}
-              >
-                <div className="gdp-marker-flag">
-                  Available: t ≥ {currentFrame.currentFinishTime}
-                </div>
+            <div className="gdp-timeline-flex-wrapper">
+              {/* Left Column: Activity Labels */}
+              <div className="gdp-timeline-labels-col">
+                <div className="gdp-timeline-axis-label-slot">Time (t) ➔</div>
+                {currentFrame.activities.map((act) => (
+                  <div key={act.id} className="gdp-timeline-label-cell">
+                    <span className="font-semibold text-slate-200">{act.name}</span>
+                    <span className="text-xs text-slate-400 font-mono">[{act.start}–{act.finish}]</span>
+                  </div>
+                ))}
               </div>
-            )}
 
-            {/* Activity Bars */}
-            <div className="gdp-timeline-bars">
-              {currentFrame.activities.map((act, idx) => {
-                const isActive = currentFrame.activeIdx === idx;
-                const isCompared = currentFrame.comparedIndices?.includes(idx);
-                const leftPercent = (act.start / maxTimeline) * 100;
-                const widthPercent = ((act.finish - act.start) / maxTimeline) * 100;
-
-                let barClass = 'bar-pending';
-                if (act.status === 'selected') barClass = 'bar-selected';
-                else if (act.status === 'rejected') barClass = 'bar-rejected';
-                else if (isActive) barClass = 'bar-evaluating';
-                else if (isCompared) barClass = 'bar-compared';
-
-                return (
-                  <div key={act.id} className="gdp-timeline-row">
-                    <div className="gdp-timeline-row-label">
-                      <span className="font-semibold text-slate-300">{act.name}</span>
-                      <span className="text-xs text-slate-500 font-mono">
-                        [{act.start}, {act.finish}]
-                      </span>
+              {/* Right Column: Exactly aligned timeline tracks & time axis */}
+              <div className="gdp-timeline-tracks-col">
+                {/* Horizontal Time Axis Header */}
+                <div className="gdp-time-axis">
+                  {timeTicks.map((tick) => (
+                    <div
+                      key={tick}
+                      className="gdp-time-tick"
+                      style={{ left: `${(tick / maxTimeline) * 100}%` }}
+                    >
+                      <span className="gdp-tick-label">{tick}</span>
+                      <div className="gdp-tick-line"></div>
                     </div>
+                  ))}
+                </div>
 
-                    <div className="gdp-timeline-track">
-                      <div
-                        className={`gdp-activity-bar ${barClass} ${isActive ? 'pulse' : ''}`}
-                        style={{
-                          left: `${leftPercent}%`,
-                          width: `${Math.max(5, widthPercent)}%`
-                        }}
-                      >
-                        <span className="gdp-bar-label">
-                          {act.name} ({act.finish - act.start}h)
-                        </span>
-                        {act.status === 'selected' && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300 ml-1" />
-                        )}
-                        {act.status === 'rejected' && (
-                          <XCircle className="w-3.5 h-3.5 text-rose-300 ml-1" />
-                        )}
-                      </div>
+                {/* Vertical Marker Line for current finish time */}
+                {currentFrame.currentFinishTime > 0 && (
+                  <div
+                    className="gdp-finish-marker-line"
+                    style={{ left: `${(currentFrame.currentFinishTime / maxTimeline) * 100}%` }}
+                  >
+                    <div className="gdp-marker-flag">
+                      Next start ≥ {currentFrame.currentFinishTime}
                     </div>
                   </div>
-                );
-              })}
+                )}
+
+                {/* Activity Bars Stack */}
+                <div className="gdp-timeline-bars-stack">
+                  {currentFrame.activities.map((act, idx) => {
+                    const isActive = currentFrame.activeIdx === idx;
+                    const isCompared = currentFrame.comparedIndices?.includes(idx);
+                    const leftPercent = (act.start / maxTimeline) * 100;
+                    const widthPercent = ((act.finish - act.start) / maxTimeline) * 100;
+
+                    let barClass = 'bar-pending';
+                    if (act.status === 'selected') barClass = 'bar-selected';
+                    else if (act.status === 'rejected') barClass = 'bar-rejected';
+                    else if (isActive) barClass = 'bar-evaluating';
+                    else if (isCompared) barClass = 'bar-compared';
+
+                    return (
+                      <div key={act.id} className="gdp-timeline-track-row">
+                        <div
+                          className={`gdp-activity-bar ${barClass} ${isActive ? 'pulse' : ''}`}
+                          style={{
+                            left: `${leftPercent}%`,
+                            width: `${Math.max(4, widthPercent)}%`
+                          }}
+                        >
+                          <span className="gdp-bar-label">
+                            {act.name} ({act.finish - act.start}h)
+                          </span>
+                          {act.status === 'selected' && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300 ml-1" />
+                          )}
+                          {act.status === 'rejected' && (
+                            <XCircle className="w-3.5 h-3.5 text-rose-300 ml-1" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
