@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { QUIZ_QUESTIONS } from '../data/quizQuestions';
 import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, HelpCircle, Award } from 'lucide-react';
 
-export default function Quiz({ filterAlgorithmId = null }) {
-  const questions = filterAlgorithmId
-    ? QUIZ_QUESTIONS.filter(q => q.algorithmId === filterAlgorithmId)
-    : QUIZ_QUESTIONS;
+export default function Quiz({ filterAlgorithmId = null, filterCategory = null }) {
+  const questions = useMemo(() => {
+    let list = QUIZ_QUESTIONS;
+    if (filterCategory && filterCategory !== 'all') {
+      list = list.filter(q => q.category === filterCategory);
+    }
+    if (filterAlgorithmId) {
+      list = list.filter(q => q.algorithmId === filterAlgorithmId);
+    }
+    return list;
+  }, [filterCategory, filterAlgorithmId]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({}); // { questionId: optionIdx }
   const [showExplanation, setShowExplanation] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Reset quiz state when filter changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setSelectedAnswers({});
+    setShowExplanation({});
+    setIsSubmitted(false);
+  }, [filterCategory, filterAlgorithmId]);
 
   if (!questions || questions.length === 0) {
     return <div className="quiz-empty">No quiz questions available for this topic.</div>;
