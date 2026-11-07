@@ -126,6 +126,13 @@ export default function ActivityVisualizer() {
   };
 
   // Controls
+  const handlePlay = () => {
+    if (currentStepIdx >= steps.length - 1) {
+      setCurrentStepIdx(0);
+    }
+    setIsPlaying(true);
+  };
+
   const handleStart = () => {
     setCurrentStepIdx(0);
     setIsPlaying(true);
@@ -138,13 +145,56 @@ export default function ActivityVisualizer() {
 
   const handleNext = () => {
     setIsPlaying(false);
-    setCurrentStepIdx((prev) => Math.min(prev + 1, steps.length - 1));
+    if (currentStepIdx >= steps.length - 1) {
+      setCurrentStepIdx(0);
+    } else {
+      setCurrentStepIdx((prev) => Math.min(prev + 1, steps.length - 1));
+    }
   };
 
   const handlePrev = () => {
     setIsPlaying(false);
     setCurrentStepIdx((prev) => Math.max(prev - 1, 0));
   };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (
+        document.activeElement && (
+          document.activeElement.tagName === 'INPUT' ||
+          document.activeElement.tagName === 'TEXTAREA' ||
+          document.activeElement.tagName === 'SELECT'
+        )
+      ) return;
+
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        setIsPlaying((prev) => {
+          if (!prev && currentStepIdx >= steps.length - 1) {
+            setCurrentStepIdx(0);
+            return true;
+          }
+          return !prev;
+        });
+      } else if (e.key === 'ArrowRight' || e.code === 'ArrowRight') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentStepIdx((prev) => Math.min(prev + 1, steps.length - 1));
+      } else if (e.key === 'ArrowLeft' || e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentStepIdx((prev) => Math.max(0, prev - 1));
+      } else if (e.key === 'r' || e.key === 'R' || e.code === 'KeyR') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentStepIdx(0);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStepIdx, steps.length]);
 
   const maxTimeline = currentFrame.maxTimeline || 12;
   const timeTicks = Array.from({ length: maxTimeline + 1 }, (_, i) => i);
@@ -222,6 +272,30 @@ export default function ActivityVisualizer() {
           )}
         </div>
       </div>
+
+      {/* Common Controls */}
+      <VisualizationControls
+        currentStepIdx={currentStepIdx}
+        totalSteps={steps.length}
+        isPlaying={isPlaying}
+        speed={speed}
+        onPlay={handlePlay}
+        onPause={() => setIsPlaying(false)}
+        onNext={handleNext}
+        onPrev={handlePrev}
+        onReset={handleReset}
+        onStart={handleStart}
+        onSpeedChange={setSpeed}
+        onStepSelect={(idx) => {
+          setIsPlaying(false);
+          setCurrentStepIdx(idx);
+        }}
+        samples={SAMPLES}
+        currentSampleName={selectedSampleName}
+        onSelectSample={handleSelectSample}
+        stepDescription={currentFrame.description}
+        stepType={currentFrame.type}
+      />
 
       {/* Main Visualization Stage: Timeline & Status */}
       <div className="gdp-stage-grid">
@@ -425,30 +499,6 @@ export default function ActivityVisualizer() {
       <AlgorithmExecutionPanel
         algoId="activity-selection"
         currentStep={currentFrame}
-      />
-
-      {/* Common Controls */}
-      <VisualizationControls
-        currentStepIdx={currentStepIdx}
-        totalSteps={steps.length}
-        isPlaying={isPlaying}
-        speed={speed}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onNext={handleNext}
-        onPrev={handlePrev}
-        onReset={handleReset}
-        onStart={handleStart}
-        onSpeedChange={setSpeed}
-        onStepSelect={(idx) => {
-          setIsPlaying(false);
-          setCurrentStepIdx(idx);
-        }}
-        samples={SAMPLES}
-        currentSampleName={selectedSampleName}
-        onSelectSample={handleSelectSample}
-        stepDescription={currentFrame.description}
-        stepType={currentFrame.type}
       />
     </div>
   );

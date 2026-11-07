@@ -9,11 +9,15 @@ import PseudocodeHighlight from '../components/PseudocodeHighlight';
 import VisualizerErrorBoundary from '../components/VisualizerErrorBoundary';
 import { runSortingAlgorithm } from '../algorithms';
 import { ALGORITHMS } from '../data/algorithms';
+import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
+import GreedyDPPage from '../greedy-dp/GreedyDPPage';
 import { playTone } from '../utils/audio';
 import {
   Clock, HardDrive, BarChart2, CheckCircle2, ShieldCheck, ShieldAlert,
-  Layers, Play, Pause, SkipForward, SkipBack, RotateCcw
+  Layers, Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles
 } from 'lucide-react';
+
+const GREEDY_DP_IDS = new Set(GREEDY_DP_ALGORITHMS.map(a => a.id));
 
 // Algorithms that have their own dedicated visualizers (with built-in panels)
 const DEDICATED_VIS_ALGOS = new Set(['heap-sort', 'quick-sort', 'merge-sort']);
@@ -46,7 +50,16 @@ function clampSizeForAlgo(size, id) {
 }
 
 export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
-  const algoId = selectedAlgoId || 'bubble-sort';
+  const isGreedyDp = GREEDY_DP_IDS.has(selectedAlgoId);
+  const [activeCategory, setActiveCategory] = useState(() => isGreedyDp ? 'greedy-dp' : 'sorting');
+
+  useEffect(() => {
+    if (GREEDY_DP_IDS.has(selectedAlgoId)) {
+      setActiveCategory('greedy-dp');
+    }
+  }, [selectedAlgoId]);
+
+  const algoId = (!isGreedyDp && selectedAlgoId) ? selectedAlgoId : 'bubble-sort';
   const currentAlgoData = ALGORITHMS.find(a => a.id === algoId) || ALGORITHMS[0];
 
   // ── Load persisted preferences on mount ────────────────────────────────────
@@ -211,8 +224,58 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     setSpeed(Math.max(minDelay, newSpeed));
   };
 
+  if (activeCategory === 'greedy-dp') {
+    return (
+      <div className="vis-page-root">
+        {/* Category Switcher Tabs */}
+        <div className="flex justify-center py-3 bg-slate-950/80 border-b border-slate-800">
+          <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 gap-1.5 shadow-md">
+            <button
+              onClick={() => setActiveCategory('sorting')}
+              className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all"
+            >
+              <Layers className="w-4 h-4" />
+              <span>Sorting Algorithms (10)</span>
+            </button>
+            <button
+              onClick={() => setActiveCategory('greedy-dp')}
+              className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white shadow-glow transition-all"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Greedy & Dynamic Programming (4)</span>
+            </button>
+          </div>
+        </div>
+
+        <GreedyDPPage
+          selectedAlgoId={isGreedyDp ? selectedAlgoId : 'fractional-knapsack'}
+          onSelectAlgoId={onSelectAlgoId}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`vis-page-root vis-theme-${vizTheme}`}>
+      {/* Category Switcher Tabs */}
+      <div className="flex justify-center py-3 bg-slate-950/80 border-b border-slate-800">
+        <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 gap-1.5 shadow-md">
+          <button
+            onClick={() => setActiveCategory('sorting')}
+            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white shadow-glow transition-all"
+          >
+            <Layers className="w-4 h-4" />
+            <span>Sorting Algorithms (10)</span>
+          </button>
+          <button
+            onClick={() => setActiveCategory('greedy-dp')}
+            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all"
+          >
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>Greedy & Dynamic Programming (4)</span>
+          </button>
+        </div>
+      </div>
 
       {/* ── TOP CONTROLS ── */}
       <VisualizerControls

@@ -38,23 +38,46 @@ export default function VisualizationControls({
     switch (type) {
       case 'compare':
       case 'eval':
+      case 'sort_compare':
+      case 'eval_activity':
         return 'gdp-badge-amber';
       case 'swap':
       case 'merge':
+      case 'sort_swap':
+      case 'merge_nodes':
         return 'gdp-badge-purple';
       case 'select':
       case 'take_full':
       case 'match':
+      case 'cell_match':
+      case 'activity_selected':
+      case 'select_first':
+      case 'backtrack_match':
         return 'gdp-badge-emerald';
       case 'take_partial':
+      case 'calc_ratio':
+      case 'ratio_computed':
         return 'gdp-badge-cyan';
       case 'reject':
       case 'mismatch':
+      case 'cell_mismatch':
+      case 'activity_rejected':
+      case 'knapsack_reject':
         return 'gdp-badge-rose';
       case 'complete':
+      case 'tree_complete':
+      case 'table_complete':
         return 'gdp-badge-emerald';
       default:
         return 'gdp-badge-blue';
+    }
+  };
+
+  const handlePlayClick = () => {
+    if (isPlaying) {
+      onPause();
+    } else {
+      onPlay();
     }
   };
 
@@ -83,22 +106,44 @@ export default function VisualizationControls({
           </div>
         )}
 
-        {/* Speed Slider */}
+        {/* Speed Controls with Presets & Slider */}
         <div className="gdp-speed-group">
           <Gauge className="w-4 h-4 text-indigo-400" />
           <span className="gdp-speed-label">Speed:</span>
+          
+          <div className="flex items-center gap-1">
+            {[
+              { label: '0.5x', val: 1200 },
+              { label: '1x', val: 600 },
+              { label: '2x', val: 300 },
+              { label: '4x', val: 120 }
+            ].map(preset => (
+              <button
+                key={preset.label}
+                onClick={() => onSpeedChange(preset.val)}
+                className={`px-2 py-0.5 rounded text-xs font-mono font-semibold transition-colors ${
+                  speed === preset.val 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
           <input
             type="range"
-            min="100"
+            min="80"
             max="1500"
-            step="50"
+            step="40"
             value={speed}
             onChange={(e) => onSpeedChange(Number(e.target.value))}
             className="gdp-speed-slider"
             title={`${speed}ms delay`}
           />
           <span className="gdp-speed-val">
-            {speed <= 250 ? 'Fast' : speed <= 700 ? 'Normal' : 'Slow'} ({speed}ms)
+            {speed}ms
           </span>
         </div>
       </div>
@@ -106,80 +151,88 @@ export default function VisualizationControls({
       {/* Main Buttons Bar */}
       <div className="gdp-controls-main">
         <div className="gdp-btn-group">
-          {/* Start / Reset Button */}
-          {!isStarted ? (
-            <button
-              onClick={onStart}
-              className="gdp-btn gdp-btn-primary"
-              title="Start algorithm visualization"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>Start</span>
-            </button>
-          ) : (
-            <button
-              onClick={onReset}
-              className="gdp-btn gdp-btn-outline"
-              title="Reset to initial state"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset</span>
-            </button>
-          )}
+          {/* 1. Start Button: Starts or restarts from beginning */}
+          <button
+            onClick={onStart}
+            className="gdp-btn gdp-btn-primary"
+            title="Start algorithm visualization from beginning"
+          >
+            <Play className="w-4 h-4 fill-current" />
+            <span>Start</span>
+          </button>
 
-          {/* Previous Step */}
+          {/* 2. Previous Step */}
           <button
             onClick={onPrev}
             disabled={currentStepIdx <= 0}
             className="gdp-btn gdp-btn-secondary"
-            title="Step back to previous state"
+            title="Step back to previous state (←)"
           >
             <SkipBack className="w-4 h-4" />
             <span>Prev Step</span>
           </button>
 
-          {/* Play / Pause Toggle */}
+          {/* 3. Play / Pause Button */}
           {isPlaying ? (
             <button
-              onClick={onPause}
+              onClick={handlePlayClick}
               className="gdp-btn gdp-btn-warning"
-              title="Pause automatic playback"
+              title="Pause automatic playback (Space)"
             >
               <Pause className="w-4 h-4 fill-current" />
               <span>Pause</span>
             </button>
           ) : (
             <button
-              onClick={onPlay}
-              disabled={isCompleted}
-              className="gdp-btn gdp-btn-primary"
-              title="Auto-play all steps"
+              onClick={handlePlayClick}
+              className="gdp-btn gdp-btn-success"
+              title="Auto-play all steps (Space)"
             >
               <Play className="w-4 h-4 fill-current" />
-              <span>Play</span>
+              <span>{isCompleted ? 'Replay' : 'Play'}</span>
             </button>
           )}
 
-          {/* Next Step */}
+          {/* 4. Next Step */}
           <button
             onClick={onNext}
-            disabled={isCompleted}
+            disabled={isCompleted && !isPlaying}
             className="gdp-btn gdp-btn-secondary"
-            title="Advance one step"
+            title="Advance one step (→)"
           >
             <span>Next Step</span>
             <SkipForward className="w-4 h-4" />
           </button>
+
+          {/* 5. Reset Button */}
+          <button
+            onClick={onReset}
+            className="gdp-btn gdp-btn-outline"
+            title="Reset to initial state (R)"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Reset</span>
+          </button>
         </div>
 
-        {/* Step Indicator */}
-        <div className="gdp-step-counter">
-          <span className="gdp-step-current">
-            {totalSteps > 0 ? currentStepIdx + 1 : 0}
-          </span>
-          <span className="gdp-step-slash">/</span>
-          <span className="gdp-step-total">{totalSteps}</span>
-          <span className="gdp-step-text">Steps</span>
+        {/* Step Indicator & Keyboard Hints */}
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+            <span>Keys:</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">Space</kbd>
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">←</kbd>
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">→</kbd>
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">R</kbd>
+          </div>
+
+          <div className="gdp-step-counter">
+            <span className="gdp-step-current">
+              {totalSteps > 0 ? currentStepIdx + 1 : 0}
+            </span>
+            <span className="gdp-step-slash">/</span>
+            <span className="gdp-step-total">{totalSteps}</span>
+            <span className="gdp-step-text">Steps</span>
+          </div>
         </div>
       </div>
 
@@ -208,9 +261,9 @@ export default function VisualizationControls({
         </div>
         <div className="gdp-banner-content">
           <div className="gdp-banner-header">
-            <span className="gdp-banner-badge">{stepType.toUpperCase().replace('_', ' ')}</span>
+            <span className="gdp-banner-badge">{stepType.toUpperCase().replace(/_/g, ' ')}</span>
             <span className="gdp-banner-progress">
-              {isCompleted ? 'Algorithm Completed' : `Executing Step ${currentStepIdx + 1}`}
+              {isCompleted ? 'Optimal Solution Reached' : `Step ${currentStepIdx + 1} of ${totalSteps}`}
             </span>
           </div>
           <p className="gdp-banner-desc">

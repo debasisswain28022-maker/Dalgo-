@@ -23,7 +23,7 @@ export const algorithmGenerators = {
 };
 
 export function runSortingAlgorithm(id, array, options = {}) {
-  const generator = algorithmGenerators[id];
+  const generator = algorithmGenerators[id] || algorithmGenerators['bubble-sort'];
   if (!generator) {
     throw new Error(`Algorithm '${id}' not found`);
   }

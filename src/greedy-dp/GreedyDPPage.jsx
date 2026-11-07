@@ -25,6 +25,7 @@ export default function GreedyDPPage({ selectedAlgoId, onSelectAlgoId, onNavigat
   useEffect(() => {
     if (selectedAlgoId) {
       setActiveAlgoId(selectedAlgoId);
+      setActiveViewMode('visualizer');
     }
   }, [selectedAlgoId]);
 
