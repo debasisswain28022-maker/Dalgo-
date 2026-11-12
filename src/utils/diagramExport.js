@@ -247,3 +247,4 @@ export async function exportToPng(element, filename = 'dalgo-diagram', title = '
     throw err;
   }
 }
+
