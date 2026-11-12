@@ -3,6 +3,7 @@ import VisualizationControls from '../common/VisualizationControls';
 import AlgorithmExecutionPanel from '../common/AlgorithmExecutionPanel';
 import { generateLcsSteps } from './logic';
 import { exportToPng, exportToSvg } from '../../utils/diagramExport';
+import { exportAllGreedyDpStepsPng, exportAllGreedyDpStepsSvg } from '../../utils/allStepsExport';
 import {
   Grid,
   Sparkles,
@@ -109,22 +110,41 @@ export default function LcsVisualizer() {
   };
 
   const handleExport = async (format) => {
-    if (!stageRef.current) return;
     const filename = `lcs_matrix_${s1}_vs_${s2}`;
     const title = `LCS DP Matrix (${s1} vs ${s2})`;
     try {
-      if (format === 'svg') {
-        await exportToSvg(stageRef.current, filename, title);
-        setToastMessage(`Exported ${filename}.svg successfully!`);
+      if (format === 'all_png') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (PNG)...`);
+        const fn = await exportAllGreedyDpStepsPng({
+          algoId: 'longest-common-subsequence',
+          algoName: 'Longest Common Subsequence',
+          sampleName: `${s1} vs ${s2}`,
+          steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${fn}!`);
+      } else if (format === 'all_svg') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (SVG)...`);
+        const fn = await exportAllGreedyDpStepsSvg({
+          algoId: 'longest-common-subsequence',
+          algoName: 'Longest Common Subsequence',
+          sampleName: `${s1} vs ${s2}`,
+          steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${fn}!`);
+      } else if (format === 'single_svg' || format === 'svg') {
+        if (!stageRef.current) return;
+        await exportToSvg(stageRef.current, `${filename}_step_${currentStepIdx + 1}`, title);
+        setToastMessage(`Exported ${filename}_step_${currentStepIdx + 1}.svg successfully!`);
       } else {
-        await exportToPng(stageRef.current, filename, title);
-        setToastMessage(`Exported ${filename}.png successfully!`);
+        if (!stageRef.current) return;
+        await exportToPng(stageRef.current, `${filename}_step_${currentStepIdx + 1}`, title);
+        setToastMessage(`Exported ${filename}_step_${currentStepIdx + 1}.png successfully!`);
       }
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     } catch (e) {
       console.error('Export error:', e);
       setToastMessage('Export failed. Please try again.');
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     }
   };
 

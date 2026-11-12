@@ -3,6 +3,7 @@ import VisualizationControls from '../common/VisualizationControls';
 import AlgorithmExecutionPanel from '../common/AlgorithmExecutionPanel';
 import { generateActivitySteps } from './logic';
 import { exportToPng, exportToSvg } from '../../utils/diagramExport';
+import { exportAllGreedyDpStepsPng, exportAllGreedyDpStepsSvg } from '../../utils/allStepsExport';
 import {
   Calendar,
   Clock,
@@ -161,23 +162,43 @@ export default function ActivityVisualizer() {
   };
 
   const handleExport = async (format) => {
-    if (!stageRef.current) return;
     const cleanSample = selectedSampleName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-    const filename = `activity_selection_timeline_${cleanSample}`;
     const title = `Activity Selection Timeline (${selectedSampleName})`;
     try {
-      if (format === 'svg') {
+      if (format === 'all_png') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (PNG)...`);
+        const fn = await exportAllGreedyDpStepsPng({
+          algoId: 'activity-selection',
+          algoName: 'Activity Selection',
+          sampleName: selectedSampleName,
+          steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${fn}!`);
+      } else if (format === 'all_svg') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (SVG)...`);
+        const fn = await exportAllGreedyDpStepsSvg({
+          algoId: 'activity-selection',
+          algoName: 'Activity Selection',
+          sampleName: selectedSampleName,
+          steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${fn}!`);
+      } else if (format === 'single_svg' || format === 'svg') {
+        if (!stageRef.current) return;
+        const filename = `activity_selection_step_${currentStepIdx + 1}_${cleanSample}`;
         await exportToSvg(stageRef.current, filename, title);
         setToastMessage(`Exported ${filename}.svg successfully!`);
       } else {
+        if (!stageRef.current) return;
+        const filename = `activity_selection_step_${currentStepIdx + 1}_${cleanSample}`;
         await exportToPng(stageRef.current, filename, title);
         setToastMessage(`Exported ${filename}.png successfully!`);
       }
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     } catch (e) {
       console.error('Export error:', e);
       setToastMessage('Export failed. Please try again.');
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     }
   };
 

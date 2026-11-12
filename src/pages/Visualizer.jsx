@@ -14,6 +14,7 @@ import GreedyDPPage from '../greedy-dp/GreedyDPPage';
 import '../greedy-dp/styles/greedy-dp.css';
 import { playTone } from '../utils/audio';
 import { exportToPng, exportToSvg } from '../utils/diagramExport';
+import { exportAllSortingStepsPng, exportAllSortingStepsSvg } from '../utils/allStepsExport';
 import {
   Clock, HardDrive, BarChart2, CheckCircle2, ShieldCheck, ShieldAlert,
   Layers, Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles
@@ -233,22 +234,41 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   };
 
   const handleExport = async (format) => {
-    if (!vizCanvasRef.current) return;
-    const filename = `${algoId}_visualizer`;
-    const title = `${currentAlgoData.name} Visualization`;
     try {
-      if (format === 'svg') {
-        await exportToSvg(vizCanvasRef.current, filename, title);
+      if (format === 'all_png') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (PNG)...`);
+        const filename = await exportAllSortingStepsPng({
+          algoName: currentAlgoData.name,
+          algoData: currentAlgoData,
+          initialArray: array,
+          steps: steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${filename}!`);
+      } else if (format === 'all_svg') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (SVG)...`);
+        const filename = await exportAllSortingStepsSvg({
+          algoName: currentAlgoData.name,
+          algoData: currentAlgoData,
+          initialArray: array,
+          steps: steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${filename}!`);
+      } else if (format === 'single_svg' || format === 'svg') {
+        if (!vizCanvasRef.current) return;
+        const filename = `${algoId}_step_${currentStepIdx + 1}`;
+        await exportToSvg(vizCanvasRef.current, filename, `${currentAlgoData.name} Step ${currentStepIdx + 1}`);
         setToastMessage(`Exported ${filename}.svg successfully!`);
       } else {
-        await exportToPng(vizCanvasRef.current, filename, title);
+        if (!vizCanvasRef.current) return;
+        const filename = `${algoId}_step_${currentStepIdx + 1}`;
+        await exportToPng(vizCanvasRef.current, filename, `${currentAlgoData.name} Step ${currentStepIdx + 1}`);
         setToastMessage(`Exported ${filename}.png successfully!`);
       }
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     } catch (e) {
       console.error('Export error:', e);
       setToastMessage('Export failed. Please try again.');
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     }
   };
 

@@ -3,6 +3,7 @@ import VisualizationControls from '../common/VisualizationControls';
 import AlgorithmExecutionPanel from '../common/AlgorithmExecutionPanel';
 import { generateHuffmanSteps, decodeHuffman } from './logic';
 import { exportToPng, exportToSvg } from '../../utils/diagramExport';
+import { exportAllGreedyDpStepsPng, exportAllGreedyDpStepsSvg } from '../../utils/allStepsExport';
 import {
   Binary,
   ListTree,
@@ -179,23 +180,43 @@ export default function HuffmanVisualizer() {
   };
 
   const handleExport = async (format) => {
-    if (!treeSvgRef.current) return;
     const cleanSample = currentSampleName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-    const filename = `huffman_tree_${cleanSample}`;
     const title = `Huffman Binary Tree (${currentSampleName})`;
     try {
-      if (format === 'svg') {
+      if (format === 'all_png') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (PNG)...`);
+        const fn = await exportAllGreedyDpStepsPng({
+          algoId: 'huffman-coding',
+          algoName: 'Huffman Coding',
+          sampleName: currentSampleName,
+          steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${fn}!`);
+      } else if (format === 'all_svg') {
+        setToastMessage(`Generating storyboard of all ${steps.length} steps (SVG)...`);
+        const fn = await exportAllGreedyDpStepsSvg({
+          algoId: 'huffman-coding',
+          algoName: 'Huffman Coding',
+          sampleName: currentSampleName,
+          steps
+        });
+        setToastMessage(`Exported all ${steps.length} steps to ${fn}!`);
+      } else if (format === 'single_svg' || format === 'svg') {
+        if (!treeSvgRef.current) return;
+        const filename = `huffman_tree_step_${currentStepIdx + 1}_${cleanSample}`;
         await exportToSvg(treeSvgRef.current, filename, title);
         setToastMessage(`Exported ${filename}.svg successfully!`);
       } else {
+        if (!treeSvgRef.current) return;
+        const filename = `huffman_tree_step_${currentStepIdx + 1}_${cleanSample}`;
         await exportToPng(treeSvgRef.current, filename, title);
         setToastMessage(`Exported ${filename}.png successfully!`);
       }
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     } catch (e) {
       console.error('Export error:', e);
       setToastMessage('Export failed. Please try again.');
-      setTimeout(() => setToastMessage(''), 3500);
+      setTimeout(() => setToastMessage(''), 4000);
     }
   };
 

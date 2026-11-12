@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Play, Pause, SkipForward, SkipBack, RotateCcw, Shuffle,
   Volume2, VolumeX, Settings, X, Sun, Moon, ChevronDown,
-  Download, FileImage, Code2
+  Download, FileImage, Code2, Film
 } from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
@@ -372,32 +372,66 @@ export default function VisualizerControls({
             <div
               ref={exportPanelRef}
               className="ctrl-settings-panel"
-              style={{ width: 220, right: 0, padding: '0.4rem' }}
+              style={{ width: 250, right: 0, padding: '0.45rem' }}
             >
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">
+                Full Execution Trace
+              </div>
               <button
                 onClick={() => {
                   setExportOpen(false);
-                  if (onExport) onExport('png');
+                  if (onExport) onExport('all_png');
                 }}
                 className="gdp-export-item"
               >
-                <FileImage className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <Film className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                 <div className="text-left">
-                  <div className="font-bold text-slate-200 text-xs">Download PNG</div>
-                  <div className="text-[11px] text-slate-400">High-resolution 2× image (.png)</div>
+                  <div className="font-bold text-slate-200 text-xs">All Steps Storyboard (PNG)</div>
+                  <div className="text-[11px] text-slate-400">Complete multi-step diagram (.png)</div>
                 </div>
               </button>
               <button
                 onClick={() => {
                   setExportOpen(false);
-                  if (onExport) onExport('svg');
+                  if (onExport) onExport('all_svg');
                 }}
                 className="gdp-export-item"
               >
                 <Code2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                 <div className="text-left">
-                  <div className="font-bold text-slate-200 text-xs">Download SVG</div>
-                  <div className="text-[11px] text-slate-400">Vector graphics (.svg)</div>
+                  <div className="font-bold text-slate-200 text-xs">All Steps Storyboard (SVG)</div>
+                  <div className="text-[11px] text-slate-400">Scalable vector diagram (.svg)</div>
+                </div>
+              </button>
+
+              <div className="border-t border-slate-800 my-1"></div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">
+                Single Snapshot
+              </div>
+              <button
+                onClick={() => {
+                  setExportOpen(false);
+                  if (onExport) onExport('single_png');
+                }}
+                className="gdp-export-item"
+              >
+                <FileImage className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-bold text-slate-200 text-xs">Current Frame (PNG)</div>
+                  <div className="text-[11px] text-slate-400">Active visualization screen (.png)</div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setExportOpen(false);
+                  if (onExport) onExport('single_svg');
+                }}
+                className="gdp-export-item"
+              >
+                <Code2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-bold text-slate-200 text-xs">Current Frame (SVG)</div>
+                  <div className="text-[11px] text-slate-400">Vector snapshot (.svg)</div>
                 </div>
               </button>
             </div>
