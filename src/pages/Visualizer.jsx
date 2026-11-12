@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import VisualizerControls from '../components/VisualizerControls';
 import ArrayBars from '../components/ArrayBars';
 import MergeSortVisualizer from '../components/MergeSortVisualizer';
@@ -13,6 +13,7 @@ import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import GreedyDPPage from '../greedy-dp/GreedyDPPage';
 import '../greedy-dp/styles/greedy-dp.css';
 import { playTone } from '../utils/audio';
+import { exportToPng, exportToSvg } from '../utils/diagramExport';
 import {
   Clock, HardDrive, BarChart2, CheckCircle2, ShieldCheck, ShieldAlert,
   Layers, Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles
@@ -86,6 +87,8 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   const [steps, setSteps] = useState([]);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const vizCanvasRef = useRef(null);
 
   // ── Persist preferences whenever they change ───────────────────────────────
   useEffect(() => {
@@ -229,6 +232,26 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     setSpeed(Math.max(minDelay, newSpeed));
   };
 
+  const handleExport = async (format) => {
+    if (!vizCanvasRef.current) return;
+    const filename = `${algoId}_visualizer`;
+    const title = `${currentAlgoData.name} Visualization`;
+    try {
+      if (format === 'svg') {
+        await exportToSvg(vizCanvasRef.current, filename, title);
+        setToastMessage(`Exported ${filename}.svg successfully!`);
+      } else {
+        await exportToPng(vizCanvasRef.current, filename, title);
+        setToastMessage(`Exported ${filename}.png successfully!`);
+      }
+      setTimeout(() => setToastMessage(''), 3500);
+    } catch (e) {
+      console.error('Export error:', e);
+      setToastMessage('Export failed. Please try again.');
+      setTimeout(() => setToastMessage(''), 3500);
+    }
+  };
+
   if (activeCategory === 'greedy-dp') {
     return (
       <div className="vis-page-root">
@@ -344,6 +367,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         algoId={algoId}
         vizTheme={vizTheme}
         onToggleVizTheme={handleToggleVizTheme}
+        onExport={handleExport}
       />
 
       {/* ── ALGORITHM HEADER STRIP ── */}
@@ -385,7 +409,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
             algoId={algoId}
             onReset={() => { setCurrentStepIdx(0); setIsPlaying(false); generateNewArray(); }}
           >
-            <div className="vis-canvas-card">
+            <div className="vis-canvas-card" ref={vizCanvasRef}>
               {algoId === 'heap-sort' ? (
                 <HeapSortVisualizer
                   currentStep={currentFrame}
@@ -551,6 +575,14 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
           </span>
         </div>
       </div>
+
+      {/* Export Toast Notification */}
+      {toastMessage && (
+        <div className="gdp-export-toast">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

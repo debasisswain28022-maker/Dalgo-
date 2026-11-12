@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Play, Pause, SkipForward, SkipBack, RotateCcw, Shuffle,
-  Volume2, VolumeX, Settings, X, Sun, Moon, ChevronDown
+  Volume2, VolumeX, Settings, X, Sun, Moon, ChevronDown,
+  Download, FileImage, Code2
 } from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
@@ -30,17 +31,21 @@ export default function VisualizerControls({
   algoId = '',
   vizTheme,
   onToggleVizTheme,
+  onExport
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [inputError, setInputError] = useState('');
   const settingsPanelRef = useRef(null);
   const settingsBtnRef = useRef(null);
+  const exportBtnRef = useRef(null);
+  const exportPanelRef = useRef(null);
 
   // Cap array size for algorithms with constrained visualizers
   const maxArraySize = algoId === 'heap-sort' ? 15 : (algoId === 'quick-sort' || algoId === 'merge-sort') ? 20 : 80;
   const sizeCapped = maxArraySize < 80;
 
-  // Close settings when clicking outside
+  // Close popovers when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -52,10 +57,19 @@ export default function VisualizerControls({
       ) {
         setSettingsOpen(false);
       }
+      if (
+        exportOpen &&
+        exportPanelRef.current &&
+        !exportPanelRef.current.contains(e.target) &&
+        exportBtnRef.current &&
+        !exportBtnRef.current.contains(e.target)
+      ) {
+        setExportOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [settingsOpen]);
+  }, [settingsOpen, exportOpen]);
 
   // Close settings on Escape
   useEffect(() => {
@@ -337,6 +351,55 @@ export default function VisualizerControls({
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Export button */}
+        <div className="ctrl-settings-anchor">
+          <button
+            ref={exportBtnRef}
+            onClick={() => setExportOpen(prev => !prev)}
+            className={`btn ctrl-btn ctrl-settings-btn ${exportOpen ? 'active' : ''}`}
+            title="Export visualization diagram"
+          >
+            <Download className="w-4 h-4 text-cyan-400" />
+            <span className="ctrl-btn-label">Export</span>
+            <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
+          </button>
+
+          {exportOpen && (
+            <div
+              ref={exportPanelRef}
+              className="ctrl-settings-panel"
+              style={{ width: 220, right: 0, padding: '0.4rem' }}
+            >
+              <button
+                onClick={() => {
+                  setExportOpen(false);
+                  if (onExport) onExport('png');
+                }}
+                className="gdp-export-item"
+              >
+                <FileImage className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-bold text-slate-200 text-xs">Download PNG</div>
+                  <div className="text-[11px] text-slate-400">High-resolution 2× image (.png)</div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setExportOpen(false);
+                  if (onExport) onExport('svg');
+                }}
+                className="gdp-export-item"
+              >
+                <Code2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-bold text-slate-200 text-xs">Download SVG</div>
+                  <div className="text-[11px] text-slate-400">Vector graphics (.svg)</div>
+                </div>
+              </button>
             </div>
           )}
         </div>

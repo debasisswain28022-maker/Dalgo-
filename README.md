@@ -62,15 +62,20 @@ Experience the full interactive application online:
   - *Merge Sort:* Auxiliary array splitting and merging levels.
 - **Synthesized Audio:** Real-time Web Audio API frequency tones corresponding to bar values during comparisons and swaps.
 
-### 4. 📚 Educational Execution & Pseudocode Panels
+### 4. 📸 Export Diagram (PNG & SVG Vector Downloads)
+- **High-Resolution PNG (2× Retina):** Download publication-ready images of completed visualizations for lecture slides, homework submissions, and study notes.
+- **Scalable Vector Graphics (SVG):** Download vector diagrams of the Huffman Coding binary tree, LCS 2D matrix, and sorting trees for editing in Figma, Illustrator, or LaTeX documents.
+- **Embedded Visual Branding:** Each exported diagram includes dark theme framing and algorithm title badges.
+
+### 5. 📚 Educational Execution & Pseudocode Panels
 - **Synchronized Execution Panel:** Highlights the exact line of pseudocode executing at the current step.
 - **Multi-Language Reference Implementations:** Complete, syntax-highlighted code in **C**, **C++**, **Java**, **Python**, and **JavaScript** for every algorithm.
 - **Mathematical Foundations:** Formal time & space complexity proofs, recurrence relations, and algorithmic trade-offs.
 
-### 5. ⚡ Side-by-Side Algorithm Comparison Tool
+### 6. ⚡ Side-by-Side Algorithm Comparison Tool
 - Run multiple sorting algorithms simultaneously on identical datasets to visually evaluate performance differences between $O(n^2)$ and $O(n \log n)$ algorithms.
 
-### 6. 🧠 Interactive Algorithm Knowledge Quiz
+### 7. 🧠 Interactive Algorithm Knowledge Quiz
 - **21 Challenging Questions** divided into categories:
   - *Sorting Algorithms (10 questions):* Stability, pivot selection, heap properties, worst-case bounds.
   - *Greedy & Dynamic Programming (11 questions):* Greedy choice property, prefix codes, interval compatibility, 2D DP recurrence.

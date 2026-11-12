@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import VisualizationControls from '../common/VisualizationControls';
 import AlgorithmExecutionPanel from '../common/AlgorithmExecutionPanel';
 import { generateHuffmanSteps, decodeHuffman } from './logic';
+import { exportToPng, exportToSvg } from '../../utils/diagramExport';
 import {
   Binary,
   ListTree,
@@ -9,7 +10,8 @@ import {
   Sparkles,
   Layers,
   Cpu,
-  RefreshCw
+  RefreshCw,
+  CheckCircle2
 } from 'lucide-react';
 
 const SAMPLES = [
@@ -58,6 +60,8 @@ export default function HuffmanVisualizer() {
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(350);
+  const [toastMessage, setToastMessage] = useState('');
+  const treeSvgRef = useRef(null);
 
   // Decoder state
   const [userBinaryInput, setUserBinaryInput] = useState('');
@@ -172,6 +176,27 @@ export default function HuffmanVisualizer() {
   const handlePrev = () => {
     setIsPlaying(false);
     setCurrentStepIdx((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleExport = async (format) => {
+    if (!treeSvgRef.current) return;
+    const cleanSample = currentSampleName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    const filename = `huffman_tree_${cleanSample}`;
+    const title = `Huffman Binary Tree (${currentSampleName})`;
+    try {
+      if (format === 'svg') {
+        await exportToSvg(treeSvgRef.current, filename, title);
+        setToastMessage(`Exported ${filename}.svg successfully!`);
+      } else {
+        await exportToPng(treeSvgRef.current, filename, title);
+        setToastMessage(`Exported ${filename}.png successfully!`);
+      }
+      setTimeout(() => setToastMessage(''), 3500);
+    } catch (e) {
+      console.error('Export error:', e);
+      setToastMessage('Export failed. Please try again.');
+      setTimeout(() => setToastMessage(''), 3500);
+    }
   };
 
   // Keyboard navigation
@@ -487,6 +512,7 @@ export default function HuffmanVisualizer() {
         onSelectSample={handleSelectSample}
         stepDescription={currentFrame.description}
         stepType={currentFrame.type}
+        onExport={handleExport}
       />
 
       {/* Main Visualization Stage */}
@@ -576,7 +602,7 @@ export default function HuffmanVisualizer() {
 
           <div className="gdp-tree-svg-container">
             {activeTree ? (
-              <svg className="gdp-tree-svg" viewBox="0 0 740 360" preserveAspectRatio="xMidYMid meet">
+              <svg ref={treeSvgRef} className="gdp-tree-svg" viewBox="0 0 740 360" preserveAspectRatio="xMidYMid meet">
                 {renderTreeEdges(activeTree)}
                 {renderTreeNodes(activeTree)}
               </svg>
@@ -681,6 +707,14 @@ export default function HuffmanVisualizer() {
         algoId="huffman-coding"
         currentStep={currentFrame}
       />
+
+      {/* Export Toast Notification */}
+      {toastMessage && (
+        <div className="gdp-export-toast">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

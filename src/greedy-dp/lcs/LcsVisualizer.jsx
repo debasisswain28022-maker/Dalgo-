@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import VisualizationControls from '../common/VisualizationControls';
 import AlgorithmExecutionPanel from '../common/AlgorithmExecutionPanel';
 import { generateLcsSteps } from './logic';
+import { exportToPng, exportToSvg } from '../../utils/diagramExport';
 import {
   Grid,
   Sparkles,
-  GitCommit
+  GitCommit,
+  CheckCircle2
 } from 'lucide-react';
 
 const SAMPLES = [
@@ -39,6 +41,8 @@ export default function LcsVisualizer() {
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(250);
+  const [toastMessage, setToastMessage] = useState('');
+  const stageRef = useRef(null);
 
   // Generate steps
   const { steps } = useMemo(() => {
@@ -102,6 +106,26 @@ export default function LcsVisualizer() {
   const handlePrev = () => {
     setIsPlaying(false);
     setCurrentStepIdx((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleExport = async (format) => {
+    if (!stageRef.current) return;
+    const filename = `lcs_matrix_${s1}_vs_${s2}`;
+    const title = `LCS DP Matrix (${s1} vs ${s2})`;
+    try {
+      if (format === 'svg') {
+        await exportToSvg(stageRef.current, filename, title);
+        setToastMessage(`Exported ${filename}.svg successfully!`);
+      } else {
+        await exportToPng(stageRef.current, filename, title);
+        setToastMessage(`Exported ${filename}.png successfully!`);
+      }
+      setTimeout(() => setToastMessage(''), 3500);
+    } catch (e) {
+      console.error('Export error:', e);
+      setToastMessage('Export failed. Please try again.');
+      setTimeout(() => setToastMessage(''), 3500);
+    }
   };
 
   // Keyboard navigation
@@ -237,10 +261,11 @@ export default function LcsVisualizer() {
         onSelectSample={handleSelectSample}
         stepDescription={currentFrame.description}
         stepType={currentFrame.type}
+        onExport={handleExport}
       />
 
       {/* Main Dynamic Programming Stage */}
-      <div className="gdp-stage-grid">
+      <div className="gdp-stage-grid" ref={stageRef}>
         {/* Left Side: 2D Matrix View */}
         <div className="gdp-stage-card">
           <div className="gdp-stage-card-title">
@@ -444,6 +469,14 @@ export default function LcsVisualizer() {
         algoId="longest-common-subsequence"
         currentStep={currentFrame}
       />
+
+      {/* Export Toast Notification */}
+      {toastMessage && (
+        <div className="gdp-export-toast">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

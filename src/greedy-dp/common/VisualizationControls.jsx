@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Play,
   Pause,
@@ -8,6 +8,10 @@ import {
   Sparkles,
   Gauge,
   CheckCircle2,
+  Download,
+  FileImage,
+  Code2,
+  ChevronDown,
   Info
 } from 'lucide-react';
 
@@ -28,8 +32,22 @@ export default function VisualizationControls({
   currentSampleName = '',
   onSelectSample,
   stepDescription = '',
-  stepType = 'info'
+  stepType = 'info',
+  onExport
 }) {
+  const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setExportOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const isStarted = currentStepIdx > 0;
   const isCompleted = totalSteps > 0 && currentStepIdx >= totalSteps - 1;
 
@@ -226,6 +244,50 @@ export default function VisualizationControls({
               <span>Result</span>
             </button>
           )}
+
+          {/* 7. Export Diagram Dropdown */}
+          <div className="relative inline-block" ref={exportRef}>
+            <button
+              onClick={() => setExportOpen(prev => !prev)}
+              className="gdp-btn gdp-btn-outline border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+              title="Export visualization as PNG or SVG diagram"
+            >
+              <Download className="w-4 h-4 text-cyan-400" />
+              <span>Export</span>
+              <ChevronDown className="w-3.5 h-3.5 text-cyan-400" />
+            </button>
+
+            {exportOpen && (
+              <div className="gdp-export-dropdown-menu">
+                <button
+                  onClick={() => {
+                    setExportOpen(false);
+                    if (onExport) onExport('png');
+                  }}
+                  className="gdp-export-item"
+                >
+                  <FileImage className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="font-bold text-slate-200 text-xs">Download PNG</div>
+                    <div className="text-[11px] text-slate-400">High-resolution 2× image (.png)</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    setExportOpen(false);
+                    if (onExport) onExport('svg');
+                  }}
+                  className="gdp-export-item"
+                >
+                  <Code2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="font-bold text-slate-200 text-xs">Download SVG</div>
+                    <div className="text-[11px] text-slate-400">Vector graphics (.svg)</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Step Indicator & Keyboard Hints */}
