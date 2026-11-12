@@ -38,7 +38,7 @@ export default function LcsVisualizer() {
 
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(650);
+  const [speed, setSpeed] = useState(250);
 
   // Generate steps
   const { steps } = useMemo(() => {

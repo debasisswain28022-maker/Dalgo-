@@ -62,7 +62,7 @@ export default function ActivityVisualizer() {
 
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(650);
+  const [speed, setSpeed] = useState(350);
 
   // Generate steps
   const { steps } = useMemo(() => {

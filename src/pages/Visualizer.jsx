@@ -55,8 +55,12 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   const [activeCategory, setActiveCategory] = useState(() => isGreedyDp ? 'greedy-dp' : 'sorting');
 
   useEffect(() => {
-    if (GREEDY_DP_IDS.has(selectedAlgoId)) {
-      setActiveCategory('greedy-dp');
+    if (selectedAlgoId) {
+      if (GREEDY_DP_IDS.has(selectedAlgoId)) {
+        setActiveCategory('greedy-dp');
+      } else {
+        setActiveCategory('sorting');
+      }
     }
   }, [selectedAlgoId]);
 
@@ -232,14 +236,24 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         <div className="flex justify-center py-3 bg-slate-950/80 border-b border-slate-800">
           <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 gap-1.5 shadow-md">
             <button
-              onClick={() => setActiveCategory('sorting')}
+              onClick={() => {
+                setActiveCategory('sorting');
+                if (onSelectAlgoId && GREEDY_DP_IDS.has(selectedAlgoId)) {
+                  onSelectAlgoId('bubble-sort');
+                }
+              }}
               className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all"
             >
               <Layers className="w-4 h-4" />
               <span>Sorting Algorithms (10)</span>
             </button>
             <button
-              onClick={() => setActiveCategory('greedy-dp')}
+              onClick={() => {
+                setActiveCategory('greedy-dp');
+                if (onSelectAlgoId && !GREEDY_DP_IDS.has(selectedAlgoId)) {
+                  onSelectAlgoId('fractional-knapsack');
+                }
+              }}
               className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white shadow-glow transition-all"
             >
               <Sparkles className="w-4 h-4 text-amber-400" />
@@ -262,14 +276,24 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
       <div className="flex justify-center py-3 bg-slate-950/80 border-b border-slate-800">
         <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 gap-1.5 shadow-md">
           <button
-            onClick={() => setActiveCategory('sorting')}
+            onClick={() => {
+              setActiveCategory('sorting');
+              if (onSelectAlgoId && GREEDY_DP_IDS.has(selectedAlgoId)) {
+                onSelectAlgoId('bubble-sort');
+              }
+            }}
             className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white shadow-glow transition-all"
           >
             <Layers className="w-4 h-4" />
             <span>Sorting Algorithms (10)</span>
           </button>
           <button
-            onClick={() => setActiveCategory('greedy-dp')}
+            onClick={() => {
+              setActiveCategory('greedy-dp');
+              if (onSelectAlgoId && !GREEDY_DP_IDS.has(selectedAlgoId)) {
+                onSelectAlgoId('fractional-knapsack');
+              }
+            }}
             className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all"
           >
             <Sparkles className="w-4 h-4 text-amber-400" />
@@ -283,9 +307,26 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         selectedAlgo={algoId}
         onSelectAlgo={onSelectAlgoId}
         isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onStepForward={() => setCurrentStepIdx(p => Math.min(steps.length - 1, p + 1))}
-        onStepBackward={() => setCurrentStepIdx(p => Math.max(0, p - 1))}
+        onTogglePlay={() => {
+          if (currentStepIdx >= steps.length - 1) {
+            setCurrentStepIdx(0);
+            setIsPlaying(true);
+          } else {
+            setIsPlaying(!isPlaying);
+          }
+        }}
+        onStepForward={() => {
+          setIsPlaying(false);
+          if (currentStepIdx >= steps.length - 1) {
+            setCurrentStepIdx(0);
+          } else {
+            setCurrentStepIdx(p => p + 1);
+          }
+        }}
+        onStepBackward={() => {
+          setIsPlaying(false);
+          setCurrentStepIdx(p => Math.max(0, p - 1));
+        }}
         onReset={() => { setCurrentStepIdx(0); setIsPlaying(false); }}
         onGenerateArray={() => generateNewArray()}
         speed={speed}

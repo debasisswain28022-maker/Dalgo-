@@ -131,6 +131,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: [leaf],
       activeNodeIds: [],
       root: leaf,
+      fullTree: leaf,
+      createdNodeIds: [leaf.id],
       codes,
       originalText,
       encodedText: encoded,
@@ -143,6 +145,31 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     return { steps, root: leaf, codes, encodedText: encoded };
   }
 
+  // Pre-build the complete tree layout deterministically so the visualizer can display the entire structure
+  const savedNextId = nextNodeId;
+  let testNodes = frequencies.map((item) => createNode(item.char, item.freq));
+  testNodes.sort(compareNodes);
+  let testPq = [...testNodes];
+  while (testPq.length > 1) {
+    const m1 = testPq.shift();
+    const m2 = testPq.shift();
+    const p = createNode(null, m1.freq + m2.freq, m1, m2);
+    testPq.push(p);
+    testPq.sort(compareNodes);
+  }
+  const prebuiltRoot = testPq[0];
+  const finalCodes = {};
+  assignCodes(prebuiltRoot, '', finalCodes);
+  layoutTree(prebuiltRoot, 740, 360);
+  const fullTree = JSON.parse(JSON.stringify(prebuiltRoot));
+
+  // Reset nextNodeId for the step generation pass
+  nextNodeId = savedNextId;
+
+  // Step 2 nodes creation
+  let nodes = frequencies.map((item) => createNode(item.char, item.freq));
+  let createdNodeIds = nodes.map((n) => n.id);
+
   // Step 1: Initial frequency count
   steps.push({
     type: 'calc_freq',
@@ -150,6 +177,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     priorityQueue: [],
     activeNodeIds: [],
     root: null,
+    fullTree,
+    createdNodeIds: [],
     codes: {},
     originalText,
     encodedText: '',
@@ -160,14 +189,14 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
   });
 
   // Step 2: Create leaf nodes
-  let nodes = frequencies.map((item) => createNode(item.char, item.freq));
-
   steps.push({
     type: 'create_leaves',
     frequencies: JSON.parse(JSON.stringify(frequencies)),
     priorityQueue: JSON.parse(JSON.stringify(nodes)),
     activeNodeIds: nodes.map((n) => n.id),
     root: null,
+    fullTree,
+    createdNodeIds: [...createdNodeIds],
     codes: {},
     originalText,
     encodedText: '',
@@ -186,6 +215,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     priorityQueue: JSON.parse(JSON.stringify(nodes)),
     activeNodeIds: [],
     root: null,
+    fullTree,
+    createdNodeIds: [...createdNodeIds],
     codes: {},
     originalText,
     encodedText: '',
@@ -210,6 +241,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [min1.id],
       root: null,
+      fullTree,
+      createdNodeIds: [...createdNodeIds],
       activeSubtree: lastSubtree,
       codes: {},
       originalText,
@@ -228,6 +261,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [min1.id, min2.id],
       root: null,
+      fullTree,
+      createdNodeIds: [...createdNodeIds],
       activeSubtree: lastSubtree,
       codes: {},
       originalText,
@@ -240,6 +275,7 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     // Create new parent node
     const parentFreq = min1.freq + min2.freq;
     const parent = createNode(null, parentFreq, min1, min2);
+    createdNodeIds.push(parent.id);
 
     const subtreeLayout = JSON.parse(JSON.stringify(parent));
     layoutTree(subtreeLayout, 740, 360);
@@ -251,6 +287,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [parent.id, min1.id, min2.id],
       root: null,
+      fullTree,
+      createdNodeIds: [...createdNodeIds],
       activeSubtree: subtreeLayout,
       codes: {},
       originalText,
@@ -270,6 +308,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
       priorityQueue: JSON.parse(JSON.stringify(pq)),
       activeNodeIds: [parent.id],
       root: null,
+      fullTree,
+      createdNodeIds: [...createdNodeIds],
       activeSubtree: subtreeLayout,
       codes: {},
       originalText,
@@ -295,6 +335,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     priorityQueue: JSON.parse(JSON.stringify(pq)),
     activeNodeIds: [root.id],
     root: JSON.parse(JSON.stringify(root)),
+    fullTree: JSON.parse(JSON.stringify(root)),
+    createdNodeIds: [...createdNodeIds, root.id],
     codes: JSON.parse(JSON.stringify(codes)),
     originalText,
     encodedText: '',
@@ -321,6 +363,8 @@ export function generateHuffmanSteps(inputSource, isTextMode = true) {
     priorityQueue: JSON.parse(JSON.stringify(pq)),
     activeNodeIds: [],
     root: JSON.parse(JSON.stringify(root)),
+    fullTree: JSON.parse(JSON.stringify(root)),
+    createdNodeIds: [...createdNodeIds, root.id],
     codes: JSON.parse(JSON.stringify(codes)),
     originalText,
     encodedText,

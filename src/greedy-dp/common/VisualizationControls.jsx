@@ -196,7 +196,6 @@ export default function VisualizationControls({
           {/* 4. Next Step */}
           <button
             onClick={onNext}
-            disabled={isCompleted && !isPlaying}
             className="gdp-btn gdp-btn-secondary"
             title="Advance one step (→)"
           >
@@ -213,6 +212,20 @@ export default function VisualizationControls({
             <RotateCcw className="w-4 h-4" />
             <span>Reset</span>
           </button>
+
+          {/* 6. Skip to Result Button */}
+          {totalSteps > 1 && (
+            <button
+              onClick={() => {
+                onStepSelect(totalSteps - 1);
+              }}
+              className="gdp-btn gdp-btn-outline border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10"
+              title="Jump directly to final result"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Result</span>
+            </button>
+          )}
         </div>
 
         {/* Step Indicator & Keyboard Hints */}

@@ -55,7 +55,7 @@ export default function KnapsackVisualizer() {
 
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(600);
+  const [speed, setSpeed] = useState(350);
 
   // Generate steps from current configuration
   const { steps } = useMemo(() => {
@@ -504,8 +504,11 @@ export default function KnapsackVisualizer() {
                 </div>
               ) : (
                 <div className="gdp-bucket-empty">
-                  <Package className="w-8 h-8 text-slate-600 mb-1" />
-                  <span>Knapsack is empty</span>
+                  <Package className="w-8 h-8 text-indigo-400 mb-2 animate-bounce" />
+                  <span className="font-semibold text-slate-200">Knapsack Container (Capacity: {currentCapacity} kg)</span>
+                  <span className="text-xs text-slate-400 mt-1 max-w-xs text-center">
+                    Container ready for packing. Click <strong className="text-indigo-300">Play</strong> or <strong className="text-indigo-300">Next Step</strong> to start greedy ratio sorting & packing.
+                  </span>
                 </div>
               )}
             </div>

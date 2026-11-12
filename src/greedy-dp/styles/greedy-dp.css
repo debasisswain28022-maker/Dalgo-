@@ -1127,6 +1127,54 @@
   stroke: #a855f7;
 }
 
+.node-pending {
+  fill: rgba(15, 23, 42, 0.4);
+  stroke: rgba(148, 163, 184, 0.25);
+  stroke-dasharray: 4, 3;
+}
+
+.node-active-extract {
+  fill: #78350f !important;
+  stroke: #f59e0b !important;
+  stroke-width: 3.5px !important;
+  filter: drop-shadow(0 0 8px #f59e0b);
+}
+
+.node-faint {
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+
+.node-visible {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.gdp-edge-dashed {
+  stroke: rgba(148, 163, 184, 0.15) !important;
+  stroke-dasharray: 4, 4;
+  stroke-width: 1.5;
+}
+
+.gdp-edge-solid {
+  stroke: rgba(129, 140, 248, 0.7);
+  stroke-width: 2.5;
+}
+
+.edge-ghost {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.edge-active {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.text-pending {
+  fill: rgba(148, 163, 184, 0.4) !important;
+}
+
 .gdp-tree-node-text {
   fill: #ffffff;
   font-weight: 800;

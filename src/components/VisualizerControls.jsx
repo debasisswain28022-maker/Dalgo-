@@ -4,6 +4,7 @@ import {
   Volume2, VolumeX, Settings, X, Sun, Moon, ChevronDown
 } from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
+import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 
 export default function VisualizerControls({
   selectedAlgo,
@@ -125,6 +126,11 @@ export default function VisualizerControls({
                   <option key={a.id} value={a.id}>{a.name}</option>
                 ))}
               </optgroup>
+              <optgroup label="Greedy & Dynamic Programming">
+                {GREEDY_DP_ALGORITHMS.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </optgroup>
             </select>
             <ChevronDown className="ctrl-select-chevron" />
           </div>
@@ -176,17 +182,16 @@ export default function VisualizerControls({
           <button
             onClick={onTogglePlay}
             className={`btn ctrl-btn ctrl-play-btn ${isPlaying ? 'btn-warning' : 'btn-primary'}`}
-            disabled={isCompleted && !isPlaying}
-            title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+            title={isPlaying ? 'Pause (Space)' : isCompleted ? 'Replay (Space)' : 'Play (Space)'}
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            <span className="ctrl-btn-label">{isPlaying ? 'Pause' : 'Play'}</span>
+            <span className="ctrl-btn-label">{isPlaying ? 'Pause' : isCompleted ? 'Replay' : 'Play'}</span>
           </button>
 
           <button
             onClick={onStepForward}
             className="btn btn-icon ctrl-btn"
-            disabled={isPlaying || isCompleted}
+            disabled={isPlaying}
             title="Step forward (→)"
             aria-label="Step forward"
           >

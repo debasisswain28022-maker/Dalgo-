@@ -19,13 +19,19 @@ import {
 } from 'lucide-react';
 
 export default function GreedyDPPage({ selectedAlgoId, onSelectAlgoId, onNavigate }) {
-  const [activeAlgoId, setActiveAlgoId] = useState(selectedAlgoId || 'fractional-knapsack');
+  const [activeAlgoId, setActiveAlgoId] = useState(() => {
+    return GREEDY_DP_ALGORITHMS.some((a) => a.id === selectedAlgoId)
+      ? selectedAlgoId
+      : 'fractional-knapsack';
+  });
   const [activeViewMode, setActiveViewMode] = useState('visualizer'); // 'visualizer' | 'theory'
 
   useEffect(() => {
     if (selectedAlgoId) {
-      setActiveAlgoId(selectedAlgoId);
-      setActiveViewMode('visualizer');
+      if (GREEDY_DP_ALGORITHMS.some((a) => a.id === selectedAlgoId)) {
+        setActiveAlgoId(selectedAlgoId);
+        setActiveViewMode('visualizer');
+      }
     }
   }, [selectedAlgoId]);
 

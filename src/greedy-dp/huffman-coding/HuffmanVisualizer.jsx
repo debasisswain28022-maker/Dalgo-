@@ -57,7 +57,7 @@ export default function HuffmanVisualizer() {
   const [currentSampleName, setCurrentSampleName] = useState(SAMPLES[0].name);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(700);
+  const [speed, setSpeed] = useState(350);
 
   // Decoder state
   const [userBinaryInput, setUserBinaryInput] = useState('');
@@ -217,60 +217,74 @@ export default function HuffmanVisualizer() {
   const renderTreeEdges = (node) => {
     if (!node || node.isLeaf) return null;
     const edges = [];
+    const isNodeCreated = currentFrame.createdNodeIds ? currentFrame.createdNodeIds.includes(node.id) : true;
+
     if (node.left) {
+      const isLeftCreated = currentFrame.createdNodeIds ? currentFrame.createdNodeIds.includes(node.left.id) : true;
+      const isBranchActive = isNodeCreated && isLeftCreated;
       const midX = (node.x + node.left.x) / 2;
       const midY = (node.y + node.left.y) / 2;
       edges.push(
-        <g key={`edge-l-${node.id}-${node.left.id}`}>
+        <g key={`edge-l-${node.id}-${node.left.id}`} className={isBranchActive ? 'edge-active' : 'edge-ghost'}>
           <line
             x1={node.x}
             y1={node.y}
             x2={node.left.x}
             y2={node.left.y}
-            className="gdp-tree-edge"
+            className={`gdp-tree-edge ${isBranchActive ? 'gdp-edge-solid' : 'gdp-edge-dashed'}`}
           />
-          <circle
-            cx={midX}
-            cy={midY}
-            r={10}
-            className="gdp-edge-badge-bg"
-          />
-          <text
-            x={midX}
-            y={midY + 4}
-            className="gdp-edge-label"
-          >
-            0
-          </text>
+          {isBranchActive && (
+            <>
+              <circle
+                cx={midX}
+                cy={midY}
+                r={10}
+                className="gdp-edge-badge-bg"
+              />
+              <text
+                x={midX}
+                y={midY + 4}
+                className="gdp-edge-label"
+              >
+                0
+              </text>
+            </>
+          )}
           {renderTreeEdges(node.left)}
         </g>
       );
     }
     if (node.right) {
+      const isRightCreated = currentFrame.createdNodeIds ? currentFrame.createdNodeIds.includes(node.right.id) : true;
+      const isBranchActive = isNodeCreated && isRightCreated;
       const midX = (node.x + node.right.x) / 2;
       const midY = (node.y + node.right.y) / 2;
       edges.push(
-        <g key={`edge-r-${node.id}-${node.right.id}`}>
+        <g key={`edge-r-${node.id}-${node.right.id}`} className={isBranchActive ? 'edge-active' : 'edge-ghost'}>
           <line
             x1={node.x}
             y1={node.y}
             x2={node.right.x}
             y2={node.right.y}
-            className="gdp-tree-edge"
+            className={`gdp-tree-edge ${isBranchActive ? 'gdp-edge-solid' : 'gdp-edge-dashed'}`}
           />
-          <circle
-            cx={midX}
-            cy={midY}
-            r={10}
-            className="gdp-edge-badge-bg"
-          />
-          <text
-            x={midX}
-            y={midY + 4}
-            className="gdp-edge-label"
-          >
-            1
-          </text>
+          {isBranchActive && (
+            <>
+              <circle
+                cx={midX}
+                cy={midY}
+                r={10}
+                className="gdp-edge-badge-bg"
+              />
+              <text
+                x={midX}
+                y={midY + 4}
+                className="gdp-edge-label"
+              >
+                1
+              </text>
+            </>
+          )}
           {renderTreeEdges(node.right)}
         </g>
       );
@@ -281,29 +295,37 @@ export default function HuffmanVisualizer() {
   const renderTreeNodes = (node) => {
     if (!node) return null;
     const isLeaf = node.isLeaf;
+    const isCreated = currentFrame.createdNodeIds ? currentFrame.createdNodeIds.includes(node.id) : true;
+    const isActive = currentFrame.activeNodeIds?.includes(node.id);
+    const showCode = isLeaf && node.code && (currentFrame.type === 'tree_complete' || currentFrame.type === 'complete');
+
+    let circleClass = isLeaf ? 'node-leaf' : 'node-internal';
+    if (!isCreated) circleClass = 'node-pending';
+    else if (isActive) circleClass = 'node-active-extract';
+
     return (
-      <g key={`node-${node.id}`}>
+      <g key={`node-${node.id}`} className={isCreated ? 'node-visible' : 'node-faint'}>
         <circle
           cx={node.x}
           cy={node.y}
           r={isLeaf ? 20 : 16}
-          className={`gdp-tree-node-circle ${isLeaf ? 'node-leaf' : 'node-internal'}`}
+          className={`gdp-tree-node-circle ${circleClass}`}
         />
         <text
           x={node.x}
           y={node.y + (isLeaf ? -2 : 4)}
-          className={`gdp-tree-node-text ${isLeaf ? 'text-char' : 'text-freq'}`}
+          className={`gdp-tree-node-text ${isLeaf ? 'text-char' : 'text-freq'} ${!isCreated ? 'text-pending' : ''}`}
         >
-          {isLeaf ? (node.char === ' ' ? '␣' : node.char) : node.freq}
+          {isLeaf ? (node.char === ' ' ? '␣' : node.char) : (isCreated ? node.freq : '?')}
         </text>
         {isLeaf && (
-          <text x={node.x} y={node.y + 11} className="gdp-tree-node-subtext">
+          <text x={node.x} y={node.y + 11} className={`gdp-tree-node-subtext ${!isCreated ? 'text-pending' : ''}`}>
             f:{node.freq}
           </text>
         )}
         {/* Binary code tag below leaf node */}
-        {isLeaf && node.code && (
-          <g>
+        {showCode && (
+          <g className="animate-popIn">
             <rect
               x={node.x - 20}
               y={node.y + 24}
@@ -323,7 +345,7 @@ export default function HuffmanVisualizer() {
     );
   };
 
-  const activeTree = currentFrame.root || currentFrame.activeSubtree || null;
+  const activeTree = currentFrame.fullTree || currentFrame.root || root;
 
   return (
     <div className="gdp-vis-wrapper">
