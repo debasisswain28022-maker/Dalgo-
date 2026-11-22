@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ALGORITHMS } from '../data/algorithms';
+import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
 import ComplexityTable from '../components/ComplexityTable';
 import ArrayBars from '../components/ArrayBars';
 import { runSortingAlgorithm } from '../algorithms';
@@ -174,7 +175,7 @@ export default function Compare({ onSelectAlgorithm, onNavigate }) {
         {/* Simultaneous Bars Grid */}
         <div className="benchmark-grid">
           {selectedAlgoIds.map(id => {
-            const algo = ALGORITHMS.find(a => a.id === id);
+            const algo = ALGORITHMS.find(a => a.id === id) || MORE_SORTING_ALGORITHMS.find(a => a.id === id);
             const runner = runnerState[id];
             const currentFrame = runner?.steps[runner.currentIdx] || null;
 
@@ -270,7 +271,7 @@ export default function Compare({ onSelectAlgorithm, onNavigate }) {
 
         <div className="feature-matrix-grid">
           {selectedAlgoIds.map(id => {
-            const algo = ALGORITHMS.find(a => a.id === id);
+            const algo = ALGORITHMS.find(a => a.id === id) || MORE_SORTING_ALGORITHMS.find(a => a.id === id);
             return (
               <div key={id} className="matrix-card">
                 <h3 className="matrix-title">{algo.name}</h3>

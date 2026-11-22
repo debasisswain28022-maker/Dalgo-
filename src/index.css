@@ -741,6 +741,133 @@ code, pre {
   box-shadow: var(--shadow-lg);
 }
 
+/* ── Quick Algorithm Buttons Bar ── */
+.ctrl-quick-algo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.ctrl-quick-algo-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ctrl-quick-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: rgba(30, 41, 59, 0.6);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.ctrl-quick-pill:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #fff;
+  border-color: var(--border-hover);
+}
+
+.ctrl-quick-pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.ctrl-quick-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.ctrl-quick-more:hover,
+.ctrl-quick-more.active-more {
+  background: rgba(99, 102, 241, 0.3);
+  color: #fff;
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+}
+
+.ctrl-active-more-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  background: rgba(99, 102, 241, 0.18);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  border-radius: var(--radius-md);
+  color: #e0e7ff;
+}
+
+.ctrl-active-more-text {
+  font-size: 0.72rem;
+}
+
+.ctrl-active-more-text strong {
+  color: #fff;
+}
+
+.ctrl-active-more-diff {
+  color: #fbbf24;
+  margin-left: 3px;
+  font-size: 0.68rem;
+}
+
+.ctrl-active-more-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 1px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.ctrl-active-more-close:hover {
+  color: #fff;
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.ctrl-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+}
+
+.ctrl-order-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ctrl-order-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+}
+
 /* Toolbar: all controls on one horizontal row */
 .controls-toolbar {
   display: flex;

@@ -2,10 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Play, Pause, SkipForward, SkipBack, RotateCcw, Shuffle,
   Volume2, VolumeX, Settings, X, Sun, Moon, ChevronDown,
-  Download, FileImage, Code2, Film
+  Download, FileImage, Code2, Film, Sparkles, ArrowUpDown
 } from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
+import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
+import MoreAlgorithmsModal from './MoreAlgorithmsModal';
+
+const QUICK_SORT_ALGOS = [
+  { id: 'bubble-sort', label: 'Bubble' },
+  { id: 'selection-sort', label: 'Selection' },
+  { id: 'insertion-sort', label: 'Insertion' },
+  { id: 'merge-sort', label: 'Merge' },
+  { id: 'quick-sort', label: 'Quick' },
+  { id: 'heap-sort', label: 'Heap' },
+];
 
 export default function VisualizerControls({
   selectedAlgo,
@@ -31,15 +42,22 @@ export default function VisualizerControls({
   algoId = '',
   vizTheme,
   onToggleVizTheme,
-  onExport
+  onExport,
+  sortOrder = 'asc',
+  onOrderChange,
+  lastStandardAlgo = 'bubble-sort'
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [moreModalOpen, setMoreModalOpen] = useState(false);
   const [inputError, setInputError] = useState('');
   const settingsPanelRef = useRef(null);
   const settingsBtnRef = useRef(null);
   const exportBtnRef = useRef(null);
   const exportPanelRef = useRef(null);
+
+  const isMoreAlgo = MORE_SORTING_ALGORITHMS.some(a => a.id === selectedAlgo);
+  const currentMoreAlgo = MORE_SORTING_ALGORITHMS.find(a => a.id === selectedAlgo);
 
   // Cap array size for algorithms with constrained visualizers
   const maxArraySize = algoId === 'heap-sort' ? 15 : (algoId === 'quick-sort' || algoId === 'merge-sort') ? 20 : 80;
@@ -112,42 +130,122 @@ export default function VisualizerControls({
 
   return (
     <div className="controls-card">
+      {/* ── QUICK ALGORITHM BUTTONS ROW (Prompt: [ Bubble ] [ Selection ] [ Insertion ] [ Merge ] [ Quick ] [ Heap ] [ + More ]) ── */}
+      <div className="ctrl-quick-algo-row">
+        <div className="ctrl-quick-algo-list">
+          {QUICK_SORT_ALGOS.map((algo) => {
+            const isActive = selectedAlgo === algo.id;
+            return (
+              <button
+                key={algo.id}
+                type="button"
+                onClick={() => onSelectAlgo(algo.id)}
+                className={`ctrl-quick-pill ${isActive ? 'active' : ''}`}
+              >
+                {algo.label}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setMoreModalOpen(true)}
+            className={`ctrl-quick-pill ctrl-quick-more ${isMoreAlgo ? 'active-more' : ''}`}
+            title="Explore 9 additional sorting algorithms"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>+ More</span>
+          </button>
+        </div>
+
+        {/* If a "More" algorithm is active, show its dedicated badge with back button */}
+        {isMoreAlgo && currentMoreAlgo && (
+          <div className="ctrl-active-more-pill">
+            <span className="ctrl-active-more-text">
+              Active: <strong>{currentMoreAlgo.name}</strong>
+              <span className="ctrl-active-more-diff">({currentMoreAlgo.difficulty})</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => onSelectAlgo(lastStandardAlgo || 'bubble-sort')}
+              className="ctrl-active-more-close"
+              title="Return to standard sorting algorithm"
+              aria-label="Return to standard algorithm"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* ── MAIN TOOLBAR ROW ── */}
       <div className="controls-toolbar">
 
-        {/* Algorithm selector */}
+        {/* Algorithm selector with + More button */}
         <div className="ctrl-algo-group">
           <label htmlFor="algo-select" className="ctrl-micro-label">Algorithm</label>
-          <div className="ctrl-select-wrapper">
-            <select
-              id="algo-select"
-              value={selectedAlgo}
-              onChange={(e) => onSelectAlgo(e.target.value)}
-              className="algo-dropdown"
+          <div className="flex items-center gap-1.5">
+            <div className="ctrl-select-wrapper">
+              <select
+                id="algo-select"
+                value={selectedAlgo}
+                onChange={(e) => onSelectAlgo(e.target.value)}
+                className="algo-dropdown"
+              >
+                <optgroup label="Beginner">
+                  {ALGORITHMS.filter(a => a.category === 'Beginner').map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Intermediate">
+                  {ALGORITHMS.filter(a => a.category === 'Intermediate').map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Advanced">
+                  {ALGORITHMS.filter(a => a.category === 'Advanced').map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Greedy & Dynamic Programming">
+                  {GREEDY_DP_ALGORITHMS.map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </optgroup>
+                {/* Dynamically show the active additional algorithm if selected */}
+                {isMoreAlgo && currentMoreAlgo && (
+                  <optgroup label="Additional Algorithm">
+                    <option value={currentMoreAlgo.id}>{currentMoreAlgo.name} ({currentMoreAlgo.difficulty})</option>
+                  </optgroup>
+                )}
+              </select>
+              <ChevronDown className="ctrl-select-chevron" />
+            </div>
+
+            {/* "+ More" button beside algorithm selector */}
+            <button
+              type="button"
+              onClick={() => setMoreModalOpen(true)}
+              className={`btn ctrl-btn ctrl-more-btn ${isMoreAlgo ? 'btn-primary' : 'btn-secondary'}`}
+              title="Open additional sorting algorithms dialog"
             >
-              <optgroup label="Beginner">
-                {ALGORITHMS.filter(a => a.category === 'Beginner').map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Intermediate">
-                {ALGORITHMS.filter(a => a.category === 'Intermediate').map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Advanced">
-                {ALGORITHMS.filter(a => a.category === 'Advanced').map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Greedy & Dynamic Programming">
-                {GREEDY_DP_ALGORITHMS.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </optgroup>
-            </select>
-            <ChevronDown className="ctrl-select-chevron" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span className="ctrl-btn-label font-bold">+ More</span>
+            </button>
           </div>
+        </div>
+
+        {/* Sorting Order Toggle (Ascending / Descending) */}
+        <div className="ctrl-order-group">
+          <label className="ctrl-micro-label">Order</label>
+          <button
+            type="button"
+            onClick={() => onOrderChange && onOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="btn btn-secondary ctrl-btn ctrl-order-btn"
+            title={`Sort direction: ${sortOrder === 'asc' ? 'Ascending (Min to Max)' : 'Descending (Max to Min)'}. Click to toggle.`}
+          >
+            <ArrowUpDown className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="ctrl-btn-label">{sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓'}</span>
+          </button>
         </div>
 
         {/* Speed slider (inline, compact) */}
@@ -258,6 +356,38 @@ export default function VisualizerControls({
                 </button>
               </div>
 
+              {/* Sort Direction in Settings */}
+              <div className="ctrl-panel-section">
+                <div className="ctrl-panel-label-row">
+                  <span className="ctrl-panel-label">Sort Direction</span>
+                  <span className="ctrl-panel-value font-mono">{sortOrder === 'asc' ? 'Ascending' : 'Descending'}</span>
+                </div>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => onOrderChange && onOrderChange('asc')}
+                    className={`flex-1 py-1 px-2 rounded-lg text-xs font-semibold border transition ${
+                      sortOrder === 'asc'
+                        ? 'bg-indigo-600 text-white border-indigo-500'
+                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}
+                  >
+                    Ascending (↑)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOrderChange && onOrderChange('desc')}
+                    className={`flex-1 py-1 px-2 rounded-lg text-xs font-semibold border transition ${
+                      sortOrder === 'desc'
+                        ? 'bg-indigo-600 text-white border-indigo-500'
+                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}
+                  >
+                    Descending (↓)
+                  </button>
+                </div>
+              </div>
+
               {/* Array Size */}
               <div className="ctrl-panel-section">
                 <div className="ctrl-panel-label-row">
@@ -288,8 +418,8 @@ export default function VisualizerControls({
                   {['random', 'nearly-sorted', 'reversed', 'few-unique'].map((type) => (
                     <button
                       key={type}
-                      className={`ctrl-preset-pill ${presetType === type ? 'active' : ''}`}
                       onClick={() => onPresetChange(type)}
+                      className={`ctrl-preset-btn ${presetType === type ? 'active' : ''}`}
                     >
                       {PRESET_LABELS[type]}
                     </button>
@@ -303,39 +433,33 @@ export default function VisualizerControls({
                 <form onSubmit={handleApplyCustom} className="ctrl-custom-form">
                   <input
                     type="text"
-                    placeholder="e.g. 5, 2, 8, 1, 4"
                     value={customInput}
                     onChange={(e) => onCustomInputChange(e.target.value)}
+                    placeholder="e.g. 45, 12, 89, 34, 67"
                     className="ctrl-custom-input"
-                    aria-label="Custom array values"
                   />
-                  <button type="submit" className="btn btn-sm btn-accent">Apply</button>
+                  <button type="submit" className="btn btn-primary ctrl-custom-btn">
+                    Apply
+                  </button>
                 </form>
-                {inputError && <p className="ctrl-panel-error">{inputError}</p>}
+                {inputError && <p className="ctrl-input-error">{inputError}</p>}
+                <p className="ctrl-panel-hint">Comma-separated numbers (2–100 elements)</p>
               </div>
 
-              {/* Divider */}
-              <div className="ctrl-panel-divider" />
-
-              {/* Sound & Theme Row */}
-              <div className="ctrl-panel-section ctrl-panel-toggles">
-                {/* Sound toggle */}
+              {/* Sound & Viz Theme toggles */}
+              <div className="ctrl-panel-section ctrl-toggles-row">
                 <div className="ctrl-toggle-item">
-                  <span className="ctrl-panel-label">Sound</span>
+                  <span className="ctrl-panel-label">Audio</span>
                   <button
                     onClick={onToggleSound}
                     className={`ctrl-toggle-btn ${soundEnabled ? 'ctrl-toggle-on' : 'ctrl-toggle-off'}`}
-                    title={soundEnabled ? 'Mute audio' : 'Enable audio'}
+                    title={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
                   >
-                    {soundEnabled
-                      ? <Volume2 className="w-4 h-4" />
-                      : <VolumeX className="w-4 h-4" />
-                    }
-                    <span>{soundEnabled ? 'On' : 'Off'}</span>
+                    {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                    <span>{soundEnabled ? 'On' : 'Mute'}</span>
                   </button>
                 </div>
 
-                {/* Viz theme toggle */}
                 <div className="ctrl-toggle-item">
                   <span className="ctrl-panel-label">Viz Theme</span>
                   <button
@@ -438,6 +562,15 @@ export default function VisualizerControls({
           )}
         </div>
       </div>
+
+      {/* ── ADDITIONAL SORTING ALGORITHMS MODAL (+ MORE) ── */}
+      <MoreAlgorithmsModal
+        isOpen={moreModalOpen}
+        onClose={() => setMoreModalOpen(false)}
+        onSelectAlgo={onSelectAlgo}
+        selectedAlgo={selectedAlgo}
+        onBackToStandard={() => onSelectAlgo(lastStandardAlgo || 'bubble-sort')}
+      />
     </div>
   );
 }

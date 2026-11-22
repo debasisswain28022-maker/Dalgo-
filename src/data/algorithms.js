@@ -644,3 +644,8 @@ end procedure`,
     ]
   }
 ];
+
+import { MORE_SORTING_ALGORITHMS } from './moreAlgorithms';
+export { MORE_SORTING_ALGORITHMS };
+export const ALL_SORTING_ALGORITHMS = [...ALGORITHMS, ...MORE_SORTING_ALGORITHMS];
+

@@ -1,15 +1,27 @@
-import { generateBubbleSortSteps } from './bubbleSort';
-import { generateSelectionSortSteps } from './selectionSort';
-import { generateInsertionSortSteps } from './insertionSort';
-import { generateMergeSortSteps } from './mergeSort';
-import { generateQuickSortSteps } from './quickSort';
-import { generateHeapSortSteps } from './heapSort';
-import { generateCountingSortSteps } from './countingSort';
-import { generateRadixSortSteps } from './radixSort';
-import { generateBucketSortSteps } from './bucketSort';
-import { generateShellSortSteps } from './shellSort';
+import { generateBubbleSortSteps } from './bubbleSort.js';
+import { generateSelectionSortSteps } from './selectionSort.js';
+import { generateInsertionSortSteps } from './insertionSort.js';
+import { generateMergeSortSteps } from './mergeSort.js';
+import { generateQuickSortSteps } from './quickSort.js';
+import { generateHeapSortSteps } from './heapSort.js';
+import { generateCountingSortSteps } from './countingSort.js';
+import { generateRadixSortSteps } from './radixSort.js';
+import { generateBucketSortSteps } from './bucketSort.js';
+import { generateShellSortSteps } from './shellSort.js';
+
+// Additional 9 Sorting Algorithms
+import { generateExchangeSortSteps } from './exchangeSort.js';
+import { generateGnomeSortSteps } from './gnomeSort.js';
+import { generateCocktailShakerSortSteps } from './cocktailShakerSort.js';
+import { generateCombSortSteps } from './combSort.js';
+import { generateOddEvenSortSteps } from './oddEvenSort.js';
+import { generateCycleSortSteps } from './cycleSort.js';
+import { generateStrandSortSteps } from './strandSort.js';
+import { generateBinaryInsertionSortSteps } from './binaryInsertionSort.js';
+import { generateLibrarySortSteps } from './librarySort.js';
 
 export const algorithmGenerators = {
+  // Existing 10 algorithms
   'bubble-sort': generateBubbleSortSteps,
   'selection-sort': generateSelectionSortSteps,
   'insertion-sort': generateInsertionSortSteps,
@@ -19,7 +31,18 @@ export const algorithmGenerators = {
   'counting-sort': generateCountingSortSteps,
   'radix-sort': generateRadixSortSteps,
   'bucket-sort': generateBucketSortSteps,
-  'shell-sort': generateShellSortSteps
+  'shell-sort': generateShellSortSteps,
+
+  // Additional 9 algorithms
+  'exchange-sort': generateExchangeSortSteps,
+  'gnome-sort': generateGnomeSortSteps,
+  'cocktail-shaker-sort': generateCocktailShakerSortSteps,
+  'comb-sort': generateCombSortSteps,
+  'odd-even-sort': generateOddEvenSortSteps,
+  'cycle-sort': generateCycleSortSteps,
+  'strand-sort': generateStrandSortSteps,
+  'binary-insertion-sort': generateBinaryInsertionSortSteps,
+  'library-sort': generateLibrarySortSteps
 };
 
 export function runSortingAlgorithm(id, array, options = {}) {
@@ -30,5 +53,6 @@ export function runSortingAlgorithm(id, array, options = {}) {
   if (id === 'quick-sort') {
     return generator(array, options.pivotStrategy || 'last');
   }
-  return generator(array);
+  // Pass options to all generators supporting options (e.g. order)
+  return generator(array, options);
 }

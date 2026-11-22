@@ -9,6 +9,7 @@ import PseudocodeHighlight from '../components/PseudocodeHighlight';
 import VisualizerErrorBoundary from '../components/VisualizerErrorBoundary';
 import { runSortingAlgorithm } from '../algorithms';
 import { ALGORITHMS } from '../data/algorithms';
+import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import GreedyDPPage from '../greedy-dp/GreedyDPPage';
 import '../greedy-dp/styles/greedy-dp.css';
@@ -55,6 +56,7 @@ function clampSizeForAlgo(size, id) {
 export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   const isGreedyDp = GREEDY_DP_IDS.has(selectedAlgoId);
   const [activeCategory, setActiveCategory] = useState(() => isGreedyDp ? 'greedy-dp' : 'sorting');
+  const [lastStandardAlgo, setLastStandardAlgo] = useState('bubble-sort');
 
   useEffect(() => {
     if (selectedAlgoId) {
@@ -62,12 +64,18 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         setActiveCategory('greedy-dp');
       } else {
         setActiveCategory('sorting');
+        if (!MORE_SORTING_ALGORITHMS.some(a => a.id === selectedAlgoId)) {
+          setLastStandardAlgo(selectedAlgoId);
+        }
       }
     }
   }, [selectedAlgoId]);
 
   const algoId = (!isGreedyDp && selectedAlgoId) ? selectedAlgoId : 'bubble-sort';
-  const currentAlgoData = ALGORITHMS.find(a => a.id === algoId) || ALGORITHMS[0];
+  const isMoreAlgo = MORE_SORTING_ALGORITHMS.some(a => a.id === algoId);
+  const currentAlgoData = isMoreAlgo
+    ? MORE_SORTING_ALGORITHMS.find(a => a.id === algoId)
+    : (ALGORITHMS.find(a => a.id === algoId) || ALGORITHMS[0]);
 
   // ── Load persisted preferences on mount ────────────────────────────────────
   const savedPrefs = loadPrefs();
@@ -83,18 +91,20 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
   const [soundEnabled, setSoundEnabled] = useState(savedPrefs.soundEnabled ?? false);
   const [pivotStrategy, setPivotStrategy] = useState(savedPrefs.pivotStrategy ?? 'last');
   const [vizTheme, setVizTheme] = useState(savedPrefs.vizTheme ?? 'dark');
+  const [sortOrder, setSortOrder] = useState(savedPrefs.sortOrder ?? 'asc');
 
   const [array, setArray] = useState([]);
   const [steps, setSteps] = useState([]);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [execTimeMs, setExecTimeMs] = useState(0);
   const vizCanvasRef = useRef(null);
 
   // ── Persist preferences whenever they change ───────────────────────────────
   useEffect(() => {
-    savePrefs({ arraySize, speed, presetType, soundEnabled, pivotStrategy, vizTheme });
-  }, [arraySize, speed, presetType, soundEnabled, pivotStrategy, vizTheme]);
+    savePrefs({ arraySize, speed, presetType, soundEnabled, pivotStrategy, vizTheme, sortOrder });
+  }, [arraySize, speed, presetType, soundEnabled, pivotStrategy, vizTheme, sortOrder]);
 
   // ── Array generation ───────────────────────────────────────────────────────
   const generateNewArray = useCallback((size = arraySize, preset = presetType) => {
@@ -127,15 +137,18 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
     if (clamped !== arraySize) setArraySize(clamped);
   }, [algoId]);
 
-  // ── Generate sorting steps when array or algo changes ─────────────────────
+  // ── Generate sorting steps when array, algo or sortOrder changes ──────────
   useEffect(() => {
     if (array.length > 0) {
-      const { steps: generatedSteps } = runSortingAlgorithm(algoId, array, { pivotStrategy });
+      const t0 = performance.now();
+      const { steps: generatedSteps } = runSortingAlgorithm(algoId, array, { pivotStrategy, order: sortOrder });
+      const elapsed = (performance.now() - t0).toFixed(2);
+      setExecTimeMs(elapsed);
       setSteps(generatedSteps);
       setCurrentStepIdx(0);
       setIsPlaying(false);
     }
-  }, [algoId, array, pivotStrategy]);
+  }, [algoId, array, pivotStrategy, sortOrder]);
 
   // ── Sound effect ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -388,6 +401,9 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
         vizTheme={vizTheme}
         onToggleVizTheme={handleToggleVizTheme}
         onExport={handleExport}
+        sortOrder={sortOrder}
+        onOrderChange={setSortOrder}
+        lastStandardAlgo={lastStandardAlgo}
       />
 
       {/* ── ALGORITHM HEADER STRIP ── */}
@@ -487,6 +503,26 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
                   </div>
                 </div>
               )}
+
+              {currentFrame?.libraryGaps && currentFrame.libraryGaps.length > 0 && (
+                <div className="vis-aux-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="vis-aux-title">Library Bookshelf (Gapped Array)</span>
+                    <span className="text-[11px] text-indigo-400 font-mono">Gaps: '—'</span>
+                  </div>
+                  <div className="vis-buckets-grid" style={{ gap: '4px' }}>
+                    {currentFrame.libraryGaps.slice(0, 32).map((b, bIdx) => (
+                      <div
+                        key={bIdx}
+                        className={`vis-bucket-chip ${b === '—' ? 'opacity-40 border-dashed' : 'border-indigo-500/50 bg-indigo-950/30 text-indigo-200'}`}
+                      >
+                        <span className="vis-bucket-num">#{bIdx}</span>
+                        <span className="vis-bucket-vals font-bold">{b}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -511,6 +547,11 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
 
             {/* Stats card */}
             <div className="vis-stats-card">
+              <div className="vis-stat-row">
+                <Clock className="w-4 h-4 text-sky-400" />
+                <span className="vis-stat-label">Execution Time</span>
+                <strong className="vis-stat-val text-sky-400">{execTimeMs} ms</strong>
+              </div>
               <div className="vis-stat-row">
                 <BarChart2 className="w-4 h-4 text-amber-400" />
                 <span className="vis-stat-label">Comparisons</span>

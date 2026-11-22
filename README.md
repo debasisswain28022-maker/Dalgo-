@@ -1,10 +1,10 @@
 # ⚡ Dalgo — Interactive Algorithm Visualizer & Learning Hub
 
-An interactive, modern web application built with **React 19** and **Vite** designed to visualize, explore, and master key Computer Science algorithms step-by-step. Dalgo features **10 Sorting Algorithms** and **4 Greedy & Dynamic Programming Algorithms**, complete with live step controls, pictorial diagrams, synchronized pseudocode execution, multi-language code snippets (C, C++, Java, Python, JavaScript), and an interactive knowledge quiz.
+An interactive, modern web application built with **React 19** and **Vite** designed to visualize, explore, and master key Computer Science algorithms step-by-step. Dalgo features **19 Sorting Algorithms** (10 Standard + 9 Specialized via the **+ More** button) and **4 Greedy & Dynamic Programming Algorithms**, complete with live step controls, pictorial diagrams, synchronized pseudocode execution, multi-language code snippets (C, C++, Java, Python, JavaScript), and an interactive knowledge quiz.
 
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite 6](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)
-![Algorithms](https://img.shields.io/badge/Algorithms-14%20Total-indigo)
+![Algorithms](https://img.shields.io/badge/Algorithms-23%20Total-indigo)
 ![Deployment](https://img.shields.io/badge/Hosted%20On-GitHub%20Pages-22c55e?logo=github)
 [![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Dalgo-6366f1?style=flat-square)](https://debasisswain28022-maker.github.io/Dalgo-/)
 
@@ -85,7 +85,7 @@ Experience the full interactive application online:
 
 ## 🧮 Algorithm Complexity Reference
 
-### 1. Sorting Algorithms (10)
+### 1. Standard Sorting Algorithms (10)
 
 | Algorithm | Category | Best | Average | Worst | Auxiliary Space | Stable | In-Place |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -100,7 +100,21 @@ Experience the full interactive application online:
 | **Bucket Sort** | Advanced | $O(n + k)$ | $O(n + k)$ | $O(n^2)$ | $O(n + k)$ | ✅ | ❌ |
 | **Shell Sort** | Intermediate | $O(n \log n)$ | $O(n^{4/3})$ | $O(n^{3/2})$ | $O(1)$ | ❌ | ✅ |
 
-### 2. Greedy Algorithms & Dynamic Programming (4)
+### 2. Additional Sorting Algorithms via "+ More" (9)
+
+| Algorithm | Difficulty | Best | Average | Worst | Auxiliary Space | Stable | In-Place | Key Characteristic |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Exchange Sort** | Easy | $O(n^2)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ❌ | ✅ | Compares each index with all following elements, swapping out-of-order pairs immediately. |
+| **Gnome Sort** | Easy | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✅ | ✅ | Single-loop traversal stepping forward on order and backward on swap like a garden gnome. |
+| **Cocktail Shaker Sort** | Medium | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✅ | ✅ | Bidirectional Bubble Sort alternating forward (max) and backward (min) passes to eliminate turtles. |
+| **Comb Sort** | Medium | $O(n \log n)$ | $O(n^2 / 2^p)$ | $O(n^2)$ | $O(1)$ | ❌ | ✅ | Diminishing gap (shrink factor 1.3, Rule of 11) eliminating small values near list end. |
+| **Odd-Even Sort** | Medium | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✅ | ✅ | Brick Sort alternating parallel-friendly odd and even index adjacent comparison phases. |
+| **Cycle Sort** | Medium | $O(n^2)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ❌ | ✅ | Permutation cycle factoring; theoretically optimal minimum memory writes ($\le n - 1$). |
+| **Strand Sort** | Medium | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(n)$ | ✅ | ❌ | Repeatedly pulls ordered strands from remaining items and merges into accumulated output. |
+| **Binary Insertion Sort** | Medium | $O(n \log n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✅ | ✅ | Binary searches the sorted partition in $O(\log n)$ comparisons before block shifting. |
+| **Library Sort** | Hard | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(n)$ | ❌ | ❌ | Gapped Insertion Sort with interleaved shelf gaps and periodic rebalancing for $O(1)$ amortized shifts. |
+
+### 3. Greedy Algorithms & Dynamic Programming (4)
 
 | Algorithm | Paradigm | Greedy Strategy / DP Recurrence | Time Complexity | Space Complexity | Core Principle |
 | :--- | :--- | :--- | :---: | :---: | :--- |
