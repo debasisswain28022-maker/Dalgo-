@@ -7,7 +7,10 @@
  * @param {string} pivotStrategy - 'last' | 'first' | 'middle' | 'random'
  * @returns {{ steps: Array, stats: { comparisons: number, swaps: number, partitionsCount: number } }}
  */
-export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
+export function generateQuickSortSteps(initialArray, pivotStrategyOrOptions = 'last') {
+  const options = typeof pivotStrategyOrOptions === 'object' ? pivotStrategyOrOptions : { pivotStrategy: pivotStrategyOrOptions };
+  const pivotStrategy = options.pivotStrategy || (typeof pivotStrategyOrOptions === 'string' ? pivotStrategyOrOptions : 'last');
+  const order = options.order || 'asc';
   const mainArr = [...initialArray];
   const n = mainArr.length;
   const steps = [];
@@ -18,7 +21,22 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
   const sortedIndices = [];
 
   if (n === 0) {
-    return { steps: [], stats: { comparisons: 0, swaps: 0, partitionsCount: 0 } };
+    return {
+      steps: [{
+        type: 'completed',
+        phase: 'COMPLETED',
+        indices: [],
+        array: [],
+        sortedIndices: [],
+        treeSnapshot: [],
+        activeNodeId: null,
+        description: 'Array is empty! Nothing to sort.',
+        comparisonsCount: 0,
+        swapsCount: 0,
+        partitionsCount: 0
+      }],
+      stats: { comparisons: 0, swaps: 0, partitionsCount: 0 }
+    };
   }
 
   // Recursion Tree nodes collection
@@ -253,16 +271,16 @@ export function generateQuickSortSteps(initialArray, pivotStrategy = 'last') {
         pivotVal: pivotVal,
         pointerI: i,
         pointerJ: j,
-        comparedValues: { currentVal, pivotVal, isLess: currentVal < pivotVal },
+        comparedValues: { currentVal, pivotVal, isLess: order === 'desc' ? currentVal > pivotVal : currentVal < pivotVal },
         codeLine: 5, // "if A[j] <= pivot"
-        description: `Comparing Current element A[j=${j}] (${currentVal}) with Pivot (${pivotVal}): ${currentVal} ${currentVal < pivotVal ? '<' : '>='} ${pivotVal}`,
+        description: `Comparing Current element A[j=${j}] (${currentVal}) with Pivot (${pivotVal}): ${currentVal} ${(order === 'desc' ? currentVal > pivotVal : currentVal < pivotVal) ? (order === 'desc' ? '>' : '<') : (order === 'desc' ? '<=' : '>=')} ${pivotVal}`,
         treeStructure: getTreeSnapshot(),
         comparisonsCount,
         swapsCount,
         partitionsCount
       });
 
-      if (currentVal < pivotVal) {
+      if (order === 'desc' ? currentVal > pivotVal : currentVal < pivotVal) {
         i++;
         if (i !== j) {
           swapsCount++;

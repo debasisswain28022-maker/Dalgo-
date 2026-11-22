@@ -1,10 +1,10 @@
 # ⚡ Dalgo — Interactive Algorithm Visualizer & Learning Hub
 
-An interactive, modern web application built with **React 19** and **Vite** designed to visualize, explore, and master key Computer Science algorithms step-by-step. Dalgo features **19 Sorting Algorithms** (10 Standard + 9 Specialized via the **+ More** button) and **4 Greedy & Dynamic Programming Algorithms**, complete with live step controls, pictorial diagrams, synchronized pseudocode execution, multi-language code snippets (C, C++, Java, Python, JavaScript), and an interactive knowledge quiz.
+An interactive, modern web application built with **React 19** and **Vite** designed to visualize, explore, and master key Computer Science algorithms step-by-step. Dalgo features **28 Sorting Algorithms** (10 Standard + 21 in the categorized **+ More** hub with 12 Divide & Conquer algorithms) and **4 Greedy & Dynamic Programming Algorithms**, complete with live step controls, pictorial diagrams, synchronized pseudocode execution, multi-language code snippets (C, C++, Java, Python, JavaScript), and an interactive knowledge quiz.
 
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite 6](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)
-![Algorithms](https://img.shields.io/badge/Algorithms-23%20Total-indigo)
+![Algorithms](https://img.shields.io/badge/Algorithms-32%20Total-indigo)
 ![Deployment](https://img.shields.io/badge/Hosted%20On-GitHub%20Pages-22c55e?logo=github)
 [![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Dalgo-6366f1?style=flat-square)](https://debasisswain28022-maker.github.io/Dalgo-/)
 
@@ -100,7 +100,26 @@ Experience the full interactive application online:
 | **Bucket Sort** | Advanced | $O(n + k)$ | $O(n + k)$ | $O(n^2)$ | $O(n + k)$ | ✅ | ❌ |
 | **Shell Sort** | Intermediate | $O(n \log n)$ | $O(n^{4/3})$ | $O(n^{3/2})$ | $O(1)$ | ❌ | ✅ |
 
-### 2. Additional Sorting Algorithms via "+ More" (9)
+### 2. Divide and Conquer Sorting Algorithms (12 in "+ More" Menu)
+
+All accessible directly via the categorized **+ More** button under the **Divide & Conquer** tab:
+
+| Algorithm | Difficulty | Best | Average | Worst | Auxiliary Space | Stable | In-Place | Key Characteristic |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Merge Sort** | Medium | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ✅ | ❌ | Recursively divides into halves and merges sorted sequences with dedicated multi-level visualizer. |
+| **Quick Sort** | Medium | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(\log n)$ | ❌ | ✅ | Hoare/Lomuto partitioning around a chosen pivot; recurses on left and right sub-arrays. |
+| **Dual-Pivot Quick Sort** | Hard | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(\log n)$ | ❌ | ✅ | Yaroslavskiy partitioning dividing the array into 3 regions ($< P_1$, $P_1..P_2$, $> P_2$). Standard in Java Arrays.sort(). |
+| **Three-Way Quick Sort** | Hard | $O(n)$ | $O(n \log n)$ | $O(n^2)$ | $O(\log n)$ | ❌ | ✅ | Dijkstra's Dutch National Flag partitioning ($< pivot$, $== pivot$, $> pivot$); linear on many duplicates. |
+| **Heap Sort** | Medium | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(1)$ | ❌ | ✅ | Builds a binary heap and repeatedly extracts maximum/minimum element with animated tree visualizer. |
+| **Intro Sort** | Hard | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(\log n)$ | ❌ | ✅ | Musser's hybrid: begins with Quick Sort, switches to Heap Sort on recursion depth limit, Insertion Sort on small runs. |
+| **Tim Sort** | Hard | $O(n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ✅ | ❌ | Detects natural runs (asc/desc), extends to minRun via Insertion Sort, and merges runs stably. Standard in Python & V8. |
+| **Block Merge Sort** | Hard | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(1)$ | ✅ | ✅ | Divides array into $\sqrt{n}$ blocks and merges them using internal buffer rotations in $O(1)$ auxiliary space. |
+| **In-Place Merge Sort** | Hard | $O(n \log n)$ | $O(n \log^2 n)$ | $O(n \log^2 n)$ | $O(1)$ | ✅ | ✅ | Merges sorted halves through element rotation shifts without auxiliary array allocations. |
+| **Patience Sort** | Hard | $O(n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ❌ | ❌ | Greedy card game strategy building piles via binary search; extracts champion elements via $k$-way merge. |
+| **Smooth Sort** | Hard | $O(n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(1)$ | ❌ | ✅ | Dijkstra's adaptive Leonardo heap sort; achieves optimal $O(n)$ on pre-sorted data with $O(1)$ space. |
+| **Tournament Sort** | Hard | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | ❌ | ❌ | Builds complete binary knockout tournament tree; repeatedly extracts champion and replays path to root. |
+
+### 3. Additional Sorting Algorithms via "+ More" (9)
 
 | Algorithm | Difficulty | Best | Average | Worst | Auxiliary Space | Stable | In-Place | Key Characteristic |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -114,7 +133,7 @@ Experience the full interactive application online:
 | **Binary Insertion Sort** | Medium | $O(n \log n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | ✅ | ✅ | Binary searches the sorted partition in $O(\log n)$ comparisons before block shifting. |
 | **Library Sort** | Hard | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(n)$ | ❌ | ❌ | Gapped Insertion Sort with interleaved shelf gaps and periodic rebalancing for $O(1)$ amortized shifts. |
 
-### 3. Greedy Algorithms & Dynamic Programming (4)
+### 4. Greedy Algorithms & Dynamic Programming (4)
 
 | Algorithm | Paradigm | Greedy Strategy / DP Recurrence | Time Complexity | Space Complexity | Core Principle |
 | :--- | :--- | :--- | :---: | :---: | :--- |

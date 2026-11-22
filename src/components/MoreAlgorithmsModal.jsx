@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { X, ArrowLeft, Sparkles, Check, Clock, HardDrive, ShieldCheck, ShieldAlert } from 'lucide-react';
-import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, ArrowLeft, Sparkles, Search, Clock, HardDrive, ShieldCheck, ShieldAlert, GitFork } from 'lucide-react';
+import { MORE_SORTING_ALGORITHMS, DIVIDE_AND_CONQUER_ALGORITHMS, OTHER_MORE_ALGORITHMS } from '../data/moreAlgorithms';
 
 /**
  * Difficulty badge color resolver
@@ -41,6 +41,9 @@ export default function MoreAlgorithmsModal({
   selectedAlgo,
   onBackToStandard
 }) {
+  const [activeCategory, setActiveCategory] = useState('Divide and Conquer');
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -51,7 +54,36 @@ export default function MoreAlgorithmsModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Reset filter/search on open
+  useEffect(() => {
+    if (isOpen) {
+      setSearchQuery('');
+    }
+  }, [isOpen]);
+
+  const filteredAlgorithms = useMemo(() => {
+    return MORE_SORTING_ALGORITHMS.filter((algo) => {
+      const matchesCategory =
+        activeCategory === 'All' ||
+        algo.category === activeCategory;
+
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        algo.name.toLowerCase().includes(q) ||
+        (algo.shortDescription && algo.shortDescription.toLowerCase().includes(q)) ||
+        (algo.tagline && algo.tagline.toLowerCase().includes(q)) ||
+        algo.difficulty.toLowerCase().includes(q);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [activeCategory, searchQuery]);
+
   if (!isOpen) return null;
+
+  const dcCount = DIVIDE_AND_CONQUER_ALGORITHMS.length;
+  const otherCount = OTHER_MORE_ALGORITHMS.length;
+  const totalCount = MORE_SORTING_ALGORITHMS.length;
 
   return (
     <div
@@ -62,11 +94,11 @@ export default function MoreAlgorithmsModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-5xl max-h-[92vh] flex flex-col bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
               <Sparkles className="w-5 h-5 text-indigo-400" />
@@ -75,11 +107,11 @@ export default function MoreAlgorithmsModal({
               <h2 id="more-algos-title" className="text-lg font-bold text-slate-100 flex items-center gap-2">
                 Additional Sorting Algorithms
                 <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  9 Algorithms
+                  {totalCount} Total
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                Choose an algorithm to load its live step-by-step visualization in Dalgo.
+                Explore advanced Divide and Conquer algorithms, hybrid sorts, and specialized distribution methods.
               </p>
             </div>
           </div>
@@ -110,96 +142,178 @@ export default function MoreAlgorithmsModal({
           </div>
         </div>
 
-        {/* Algorithm Grid */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            {MORE_SORTING_ALGORITHMS.map((algo) => {
-              const isSelected = selectedAlgo === algo.id;
-              const badge = getDifficultyBadge(algo.difficulty);
+        {/* Filter bar: Categories & Search */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-3 border-b border-slate-800/80 bg-slate-950/50">
+          {/* Category Tabs */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800/80 overflow-x-auto w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setActiveCategory('Divide and Conquer')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
+                activeCategory === 'Divide and Conquer'
+                  ? 'bg-indigo-600 text-white shadow-glow'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <GitFork className="w-3.5 h-3.5 text-indigo-300" />
+              <span>Divide and Conquer ({dcCount})</span>
+            </button>
 
-              return (
-                <div
-                  key={algo.id}
-                  onClick={() => {
-                    onSelectAlgo(algo.id);
-                    onClose();
-                  }}
-                  className={`group relative flex flex-col justify-between p-4 rounded-xl border text-left cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-indigo-950/40 border-indigo-500 shadow-glow'
-                      : 'bg-slate-850 border-slate-800/90 hover:border-indigo-500/60 hover:bg-slate-800/80'
-                  }`}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+            <button
+              type="button"
+              onClick={() => setActiveCategory('Additional Sorting Algorithms')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
+                activeCategory === 'Additional Sorting Algorithms'
+                  ? 'bg-indigo-600 text-white shadow-glow'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Exotic & Distribution ({otherCount})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveCategory('All')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
+                activeCategory === 'All'
+                  ? 'bg-indigo-600 text-white shadow-glow'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              All ({totalCount})
+            </button>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search algorithms..."
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Algorithm Grid */}
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          {filteredAlgorithms.length === 0 ? (
+            <div className="text-center py-12 text-slate-500">
+              <p className="text-sm">No algorithms found matching "{searchQuery}"</p>
+              <button
+                type="button"
+                onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
+                className="mt-2 text-xs text-indigo-400 hover:underline"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {filteredAlgorithms.map((algo) => {
+                const isSelected = selectedAlgo === algo.id;
+                const badge = getDifficultyBadge(algo.difficulty);
+
+                return (
+                  <div
+                    key={algo.id}
+                    onClick={() => {
                       onSelectAlgo(algo.id);
                       onClose();
-                    }
-                  }}
-                >
-                  {/* Top row: Name & Difficulty badge */}
-                  <div>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="text-sm font-bold text-slate-100 group-hover:text-indigo-300 transition-colors">
-                        {algo.name}
-                      </h3>
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${badge.bg}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
-                        {algo.difficulty}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-slate-400 line-clamp-2 mb-3">
-                      {algo.shortDescription || algo.tagline}
-                    </p>
-                  </div>
-
-                  {/* Complexity & Specs */}
-                  <div className="pt-2 border-t border-slate-800/80">
-                    <div className="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300 mb-2.5">
-                      <div className="flex items-center gap-1 text-slate-400">
-                        <Clock className="w-3 h-3 text-sky-400" />
-                        <span>Avg: <strong className="text-slate-200">{algo.complexity.average}</strong></span>
+                    }}
+                    className={`group relative flex flex-col justify-between p-4 rounded-xl border text-left cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-indigo-950/40 border-indigo-500 shadow-glow'
+                        : 'bg-slate-850 border-slate-800/90 hover:border-indigo-500/60 hover:bg-slate-800/80'
+                    }`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        onSelectAlgo(algo.id);
+                        onClose();
+                      }
+                    }}
+                  >
+                    {/* Top row: Name & Difficulty badge */}
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <h3 className="text-sm font-bold text-slate-100 group-hover:text-indigo-300 transition-colors">
+                          {algo.name}
+                        </h3>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${badge.bg}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                          {algo.difficulty}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-1 text-slate-400">
-                        <HardDrive className="w-3 h-3 text-emerald-400" />
-                        <span>Space: <strong className="text-slate-200">{algo.complexity.space}</strong></span>
+
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400/80 mb-1.5">
+                        {algo.category}
+                      </div>
+
+                      <p className="text-xs text-slate-400 line-clamp-2 mb-3">
+                        {algo.shortDescription || algo.tagline}
+                      </p>
+                    </div>
+
+                    {/* Complexity & Specs */}
+                    <div className="pt-2 border-t border-slate-800/80">
+                      <div className="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300 mb-2.5">
+                        <div className="flex items-center gap-1 text-slate-400">
+                          <Clock className="w-3 h-3 text-sky-400" />
+                          <span>Avg: <strong className="text-slate-200">{algo.complexity.average}</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1 text-slate-400">
+                          <HardDrive className="w-3 h-3 text-emerald-400" />
+                          <span>Space: <strong className="text-slate-200">{algo.complexity.space}</strong></span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                          {algo.stable ? (
+                            <span className="text-emerald-400 flex items-center gap-0.5"><ShieldCheck className="w-3 h-3" /> Stable</span>
+                          ) : (
+                            <span className="text-slate-500 flex items-center gap-0.5"><ShieldAlert className="w-3 h-3" /> Unstable</span>
+                          )}
+                          <span>•</span>
+                          <span>{algo.inPlace ? 'In-place' : 'Auxiliary'}</span>
+                        </span>
+
+                        <button
+                          type="button"
+                          className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-slate-800 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white'
+                          }`}
+                        >
+                          {isSelected ? 'Active ✓' : 'Visualize →'}
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                        {algo.stable ? (
-                          <span className="text-emerald-400 flex items-center gap-0.5"><ShieldCheck className="w-3 h-3" /> Stable</span>
-                        ) : (
-                          <span className="text-slate-500 flex items-center gap-0.5"><ShieldAlert className="w-3 h-3" /> Unstable</span>
-                        )}
-                        <span>•</span>
-                        <span>{algo.inPlace ? 'In-place' : 'Auxiliary'}</span>
-                      </span>
-
-                      <button
-                        type="button"
-                        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-800 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white'
-                        }`}
-                      >
-                        {isSelected ? 'Active ✓' : 'Visualize →'}
-                      </button>
-                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between px-6 py-3 border-t border-slate-800 bg-slate-900/90 text-xs text-slate-400">
-          <span>Click any algorithm to visualize its comparisons, swaps, and animation steps.</span>
+          <span>Showing {filteredAlgorithms.length} of {totalCount} algorithms. Click any card to launch its live visualization.</span>
           <button
             type="button"
             onClick={onClose}

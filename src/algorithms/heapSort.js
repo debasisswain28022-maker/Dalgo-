@@ -6,7 +6,8 @@
  * @param {number[]} initialArray 
  * @returns {{ steps: Array, stats: { comparisons: number, swaps: number, heapifyCount: number } }}
  */
-export function generateHeapSortSteps(initialArray) {
+export function generateHeapSortSteps(initialArray, options = {}) {
+  const order = typeof options === 'object' && options?.order ? options.order : 'asc';
   const mainArr = [...initialArray];
   const n = mainArr.length;
   const steps = [];
@@ -17,7 +18,25 @@ export function generateHeapSortSteps(initialArray) {
   const sortedIndices = [];
 
   if (n === 0) {
-    return { steps: [], stats: { comparisons: 0, swaps: 0, heapifyCount: 0 } };
+    return {
+      steps: [{
+        type: 'completed',
+        phase: 'COMPLETED',
+        array: [],
+        heapSize: 0,
+        sortedIndices: [],
+        activeParentIdx: null,
+        leftChildIdx: null,
+        rightChildIdx: null,
+        largestIdx: null,
+        codeLine: 8,
+        description: 'Array is empty! Nothing to sort.',
+        comparisonsCount: 0,
+        swapsCount: 0,
+        heapifyCount: 0
+      }],
+      stats: { comparisons: 0, swaps: 0, heapifyCount: 0 }
+    };
   }
 
   // Initial Step
@@ -243,7 +262,7 @@ export function generateHeapSortSteps(initialArray) {
 
     if (left < size) {
       comparisonsCount++;
-      const isLeftLarger = mainArr[left] > mainArr[largest];
+      const isLeftLarger = order === 'desc' ? mainArr[left] < mainArr[largest] : mainArr[left] > mainArr[largest];
       
       steps.push({
         type: 'compare_left',
@@ -273,7 +292,7 @@ export function generateHeapSortSteps(initialArray) {
 
     if (right < size) {
       comparisonsCount++;
-      const isRightLarger = mainArr[right] > mainArr[largest];
+      const isRightLarger = order === 'desc' ? mainArr[right] < mainArr[largest] : mainArr[right] > mainArr[largest];
 
       steps.push({
         type: 'compare_right',

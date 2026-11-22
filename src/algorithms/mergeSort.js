@@ -4,7 +4,8 @@
  * @param {number[]} initialArray 
  * @returns {{ steps: Array, stats: { comparisons: number, swaps: number } }}
  */
-export function generateMergeSortSteps(initialArray) {
+export function generateMergeSortSteps(initialArray, options = {}) {
+  const order = typeof options === 'object' && options?.order ? options.order : 'asc';
   const mainArr = [...initialArray];
   const n = mainArr.length;
   const steps = [];
@@ -13,7 +14,21 @@ export function generateMergeSortSteps(initialArray) {
   let movesCount = 0;
 
   if (n === 0) {
-    return { steps: [], stats: { comparisons: 0, swaps: 0 } };
+    return {
+      steps: [{
+        type: 'completed',
+        phase: 'COMPLETED',
+        indices: [],
+        array: [],
+        sortedIndices: [],
+        treeSnapshot: [],
+        activeNodeId: null,
+        description: 'Array is empty! Nothing to sort.',
+        comparisonsCount: 0,
+        movesCount: 0
+      }],
+      stats: { comparisons: 0, swaps: 0 }
+    };
   }
 
   // Calculate max levels for divide phase
@@ -234,7 +249,8 @@ export function generateMergeSortSteps(initialArray) {
       comparisonsCount++;
       const valL = leftVals[i];
       const valR = rightVals[j];
-      const operator = valL <= valR ? '<=' : '>';
+      const isLeftBetter = order === 'desc' ? valL >= valR : valL <= valR;
+      const operator = isLeftBetter ? (order === 'desc' ? '>=' : '<=') : (order === 'desc' ? '<' : '>');
 
       // Step: Compare
       steps.push({
@@ -257,7 +273,7 @@ export function generateMergeSortSteps(initialArray) {
         movesCount
       });
 
-      if (valL <= valR) {
+      if (isLeftBetter) {
         movesCount++;
         mergedResult.push(valL);
         mainArr[mainIdx] = valL;
@@ -275,8 +291,8 @@ export function generateMergeSortSteps(initialArray) {
           leftCompareIdx: i,
           rightCompareIdx: j,
           takenValue: valL,
-          comparedValues: { leftVal: valL, rightVal: valR, operator: '<=' },
-          description: `${valL} <= ${valR} → Moving ${valL} from Left array into Result array.`,
+          comparedValues: { leftVal: valL, rightVal: valR, operator: order === 'desc' ? '>=' : '<=' },
+          description: `${valL} ${order === 'desc' ? '>=' : '<='} ${valR} → Moving ${valL} from Left array into Result array.`,
           arraySnapshot: [...mainArr],
           activeRange: [start, end],
           comparisonsCount,
@@ -419,6 +435,7 @@ export function generateMergeSortSteps(initialArray) {
     rightCompareIdx: null,
     comparedValues: null,
     description: `Merge Sort Completed! Original array is fully sorted: [${mainArr.join(', ')}]`,
+    array: [...mainArr],
     arraySnapshot: [...mainArr],
     activeRange: [0, n - 1],
     comparisonsCount,

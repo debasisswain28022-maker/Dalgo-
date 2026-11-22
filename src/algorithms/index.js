@@ -9,7 +9,7 @@ import { generateRadixSortSteps } from './radixSort.js';
 import { generateBucketSortSteps } from './bucketSort.js';
 import { generateShellSortSteps } from './shellSort.js';
 
-// Additional 9 Sorting Algorithms
+// Additional Sorting Algorithms
 import { generateExchangeSortSteps } from './exchangeSort.js';
 import { generateGnomeSortSteps } from './gnomeSort.js';
 import { generateCocktailShakerSortSteps } from './cocktailShakerSort.js';
@@ -19,6 +19,17 @@ import { generateCycleSortSteps } from './cycleSort.js';
 import { generateStrandSortSteps } from './strandSort.js';
 import { generateBinaryInsertionSortSteps } from './binaryInsertionSort.js';
 import { generateLibrarySortSteps } from './librarySort.js';
+
+// Divide and Conquer Sorting Algorithms
+import { generateDualPivotQuickSortSteps } from './dualPivotQuickSort.js';
+import { generateThreeWayQuickSortSteps } from './threeWayQuickSort.js';
+import { generateIntroSortSteps } from './introSort.js';
+import { generateTimSortSteps } from './timSort.js';
+import { generateBlockMergeSortSteps } from './blockMergeSort.js';
+import { generateInPlaceMergeSortSteps } from './inPlaceMergeSort.js';
+import { generatePatienceSortSteps } from './patienceSort.js';
+import { generateSmoothSortSteps } from './smoothSort.js';
+import { generateTournamentSortSteps } from './tournamentSort.js';
 
 export const algorithmGenerators = {
   // Existing 10 algorithms
@@ -42,7 +53,18 @@ export const algorithmGenerators = {
   'cycle-sort': generateCycleSortSteps,
   'strand-sort': generateStrandSortSteps,
   'binary-insertion-sort': generateBinaryInsertionSortSteps,
-  'library-sort': generateLibrarySortSteps
+  'library-sort': generateLibrarySortSteps,
+
+  // Divide and Conquer algorithms
+  'dual-pivot-quick-sort': generateDualPivotQuickSortSteps,
+  'three-way-quick-sort': generateThreeWayQuickSortSteps,
+  'intro-sort': generateIntroSortSteps,
+  'tim-sort': generateTimSortSteps,
+  'block-merge-sort': generateBlockMergeSortSteps,
+  'in-place-merge-sort': generateInPlaceMergeSortSteps,
+  'patience-sort': generatePatienceSortSteps,
+  'smooth-sort': generateSmoothSortSteps,
+  'tournament-sort': generateTournamentSortSteps
 };
 
 export function runSortingAlgorithm(id, array, options = {}) {
@@ -50,9 +72,6 @@ export function runSortingAlgorithm(id, array, options = {}) {
   if (!generator) {
     throw new Error(`Algorithm '${id}' not found`);
   }
-  if (id === 'quick-sort') {
-    return generator(array, options.pivotStrategy || 'last');
-  }
-  // Pass options to all generators supporting options (e.g. order)
+  // Pass options to all generators
   return generator(array, options);
 }
