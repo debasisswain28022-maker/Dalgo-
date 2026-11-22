@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ALGORITHMS } from '../data/algorithms';
+import { ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import AlgorithmCard from '../components/AlgorithmCard';
 import '../greedy-dp/styles/greedy-dp.css';
@@ -10,14 +10,24 @@ export default function Algorithms({ onNavigate, onSelectAlgorithm, onSelectGree
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const sortingCategories = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+  const sortingCategories = ['All', 'Beginner', 'Intermediate', 'Advanced', 'Divide and Conquer', 'Exotic & Other'];
   const greedyDpCategories = ['All', 'Greedy Algorithm', 'Dynamic Programming'];
 
-  const filteredSortingAlgorithms = ALGORITHMS.filter(algo => {
-    const matchesCategory = activeCategory === 'All' || algo.category === activeCategory;
-    const matchesSearch = algo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          algo.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          algo.technique.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredSortingAlgorithms = ALL_SORTING_ALGORITHMS.filter(algo => {
+    let matchesCategory = activeCategory === 'All';
+    if (!matchesCategory) {
+      if (activeCategory === 'Exotic & Other') {
+        matchesCategory = algo.category === 'Additional Sorting Algorithms' || (algo.isMore && algo.category !== 'Divide and Conquer');
+      } else {
+        matchesCategory = algo.category === activeCategory;
+      }
+    }
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+                          algo.name.toLowerCase().includes(q) ||
+                          (algo.shortDescription && algo.shortDescription.toLowerCase().includes(q)) ||
+                          (algo.technique && algo.technique.toLowerCase().includes(q)) ||
+                          (algo.tagline && algo.tagline.toLowerCase().includes(q));
     return matchesCategory && matchesSearch;
   });
 
@@ -60,7 +70,7 @@ export default function Algorithms({ onNavigate, onSelectAlgorithm, onSelectGree
         <h1 className="page-title">Algorithms Catalog</h1>
         <p className="page-subtitle">
           {mainCategory === 'sorting'
-            ? 'Explore comprehensive guides, complexity statistics, and visualizations for all 10 sorting algorithms.'
+            ? 'Explore comprehensive guides, complexity statistics, and visualizations for all 28 sorting algorithms.'
             : 'Interactive step-by-step visualizers and educational guides for Greedy Algorithms & Dynamic Programming.'}
         </p>
 
@@ -79,7 +89,7 @@ export default function Algorithms({ onNavigate, onSelectAlgorithm, onSelectGree
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span>Sorting Algorithms (10)</span>
+              <span>Sorting Algorithms (28)</span>
             </button>
             <button
               onClick={() => {

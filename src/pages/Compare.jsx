@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ALGORITHMS } from '../data/algorithms';
-import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
+import { ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import ComplexityTable from '../components/ComplexityTable';
 import ArrayBars from '../components/ArrayBars';
 import { runSortingAlgorithm } from '../algorithms';
@@ -126,7 +125,7 @@ export default function Compare({ onSelectAlgorithm, onNavigate }) {
         <div className="compare-algo-selector">
           <span className="selector-label">Select Algorithms (2-4):</span>
           <div className="algo-pills-row">
-            {ALGORITHMS.map(a => {
+            {ALL_SORTING_ALGORITHMS.map(a => {
               const isSelected = selectedAlgoIds.includes(a.id);
               return (
                 <button
@@ -175,7 +174,7 @@ export default function Compare({ onSelectAlgorithm, onNavigate }) {
         {/* Simultaneous Bars Grid */}
         <div className="benchmark-grid">
           {selectedAlgoIds.map(id => {
-            const algo = ALGORITHMS.find(a => a.id === id) || MORE_SORTING_ALGORITHMS.find(a => a.id === id);
+            const algo = ALL_SORTING_ALGORITHMS.find(a => a.id === id);
             const runner = runnerState[id];
             const currentFrame = runner?.steps[runner.currentIdx] || null;
 

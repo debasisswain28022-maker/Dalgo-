@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BarChart3, BookOpen, Layers, GitCompare, HelpCircle, Menu, X, Search, Sparkles } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { ALGORITHMS } from '../data/algorithms';
+import { ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 
 export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm, onSelectGreedyAlgorithm }) {
@@ -12,7 +12,7 @@ export default function Navbar({ activeTab, setActiveTab, onSelectAlgorithm, onS
   const lowerQuery = searchQuery.trim().toLowerCase();
 
   const filteredSortingAlgos = lowerQuery
-    ? ALGORITHMS.filter(algo => 
+    ? ALL_SORTING_ALGORITHMS.filter(algo => 
         algo.name.toLowerCase().includes(lowerQuery) ||
         algo.category.toLowerCase().includes(lowerQuery)
       ).map(a => ({ ...a, type: 'sorting' }))

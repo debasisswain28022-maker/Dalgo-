@@ -645,7 +645,16 @@ end procedure`,
   }
 ];
 
-import { MORE_SORTING_ALGORITHMS } from './moreAlgorithms';
+import { MORE_SORTING_ALGORITHMS } from './moreAlgorithms.js';
 export { MORE_SORTING_ALGORITHMS };
-export const ALL_SORTING_ALGORITHMS = [...ALGORITHMS, ...MORE_SORTING_ALGORITHMS];
+
+// Deduped list of all 28 sorting algorithms
+const uniqueSortingMap = new Map();
+ALGORITHMS.forEach(a => uniqueSortingMap.set(a.id, a));
+MORE_SORTING_ALGORITHMS.forEach(a => {
+  if (!uniqueSortingMap.has(a.id)) {
+    uniqueSortingMap.set(a.id, a);
+  }
+});
+export const ALL_SORTING_ALGORITHMS = Array.from(uniqueSortingMap.values());
 

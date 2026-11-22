@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ALGORITHMS } from '../data/algorithms';
-import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
+import { ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import ArrayBars from '../components/ArrayBars';
 import CodeViewer from '../components/CodeViewer';
 import Quiz from '../components/Quiz';
@@ -11,7 +10,7 @@ import HeapSortVisualizer from '../components/HeapSortVisualizer';
 import { Play, Pause, SkipForward, SkipBack, RotateCcw, Clock, HardDrive, ShieldCheck, ShieldAlert, Check, X, ArrowLeft, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 export default function AlgorithmDetails({ algorithmId, onNavigate, onSelectAlgorithm }) {
-  const algo = ALGORITHMS.find(a => a.id === algorithmId) || MORE_SORTING_ALGORITHMS.find(a => a.id === algorithmId) || ALGORITHMS[0];
+  const algo = ALL_SORTING_ALGORITHMS.find(a => a.id === algorithmId) || ALL_SORTING_ALGORITHMS[0];
 
   // Internal Visualizer State for the detail page
   const [array, setArray] = useState([4, 10, 3, 5, 1]);

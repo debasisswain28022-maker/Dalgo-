@@ -236,7 +236,7 @@ export default function MoreAlgorithmsModal({
                     className={`group relative flex flex-col justify-between p-4 rounded-xl border text-left cursor-pointer transition-all ${
                       isSelected
                         ? 'bg-indigo-950/40 border-indigo-500 shadow-glow'
-                        : 'bg-slate-850 border-slate-800/90 hover:border-indigo-500/60 hover:bg-slate-800/80'
+                        : 'bg-slate-900/90 border-slate-800/90 hover:border-indigo-500/60 hover:bg-slate-800/80'
                     }`}
                     role="button"
                     tabIndex={0}

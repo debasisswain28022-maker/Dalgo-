@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
-import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
+import { MORE_SORTING_ALGORITHMS, DIVIDE_AND_CONQUER_ALGORITHMS, OTHER_MORE_ALGORITHMS } from '../data/moreAlgorithms';
 import MoreAlgorithmsModal from './MoreAlgorithmsModal';
 
 const QUICK_SORT_ALGOS = [
@@ -150,7 +150,7 @@ export default function VisualizerControls({
             type="button"
             onClick={() => setMoreModalOpen(true)}
             className={`ctrl-quick-pill ctrl-quick-more ${isMoreAlgo ? 'active-more' : ''}`}
-            title="Explore 9 additional sorting algorithms"
+            title="Explore 21 additional sorting algorithms (+ More)"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>+ More</span>
@@ -191,32 +191,26 @@ export default function VisualizerControls({
                 onChange={(e) => onSelectAlgo(e.target.value)}
                 className="algo-dropdown"
               >
-                <optgroup label="Beginner">
-                  {ALGORITHMS.filter(a => a.category === 'Beginner').map(a => (
-                    <option key={a.id} value={a.id}>{a.name}</option>
+                <optgroup label="Divide & Conquer (12)">
+                  {DIVIDE_AND_CONQUER_ALGORITHMS.map(a => (
+                    <option key={`dc-${a.id}`} value={a.id}>{a.name} ({a.difficulty})</option>
                   ))}
                 </optgroup>
-                <optgroup label="Intermediate">
-                  {ALGORITHMS.filter(a => a.category === 'Intermediate').map(a => (
-                    <option key={a.id} value={a.id}>{a.name}</option>
+                <optgroup label="Additional & Exotic Sorting (9)">
+                  {OTHER_MORE_ALGORITHMS.map(a => (
+                    <option key={`other-${a.id}`} value={a.id}>{a.name} ({a.difficulty})</option>
                   ))}
                 </optgroup>
-                <optgroup label="Advanced">
-                  {ALGORITHMS.filter(a => a.category === 'Advanced').map(a => (
-                    <option key={a.id} value={a.id}>{a.name}</option>
+                <optgroup label="Standard Sorting (10)">
+                  {ALGORITHMS.map(a => (
+                    <option key={`std-${a.id}`} value={a.id}>{a.name}</option>
                   ))}
                 </optgroup>
-                <optgroup label="Greedy & Dynamic Programming">
+                <optgroup label="Greedy & Dynamic Programming (4)">
                   {GREEDY_DP_ALGORITHMS.map(a => (
-                    <option key={a.id} value={a.id}>{a.name}</option>
+                    <option key={`gdp-${a.id}`} value={a.id}>{a.name}</option>
                   ))}
                 </optgroup>
-                {/* Dynamically show the active additional algorithm if selected */}
-                {isMoreAlgo && currentMoreAlgo && (
-                  <optgroup label="Additional Algorithm">
-                    <option value={currentMoreAlgo.id}>{currentMoreAlgo.name} ({currentMoreAlgo.difficulty})</option>
-                  </optgroup>
-                )}
               </select>
               <ChevronDown className="ctrl-select-chevron" />
             </div>

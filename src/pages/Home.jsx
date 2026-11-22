@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, BookOpen, Eye, Cpu, MousePointer, HelpCircle, ArrowRight, Sparkles, Zap, Package, Binary, Calendar, Grid } from 'lucide-react';
-import { ALGORITHMS } from '../data/algorithms';
+import { ALGORITHMS, ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import ArrayBars from '../components/ArrayBars';
 import { runSortingAlgorithm } from '../algorithms';
@@ -169,19 +169,21 @@ export default function Home({ onNavigate, onSelectAlgorithm, onSelectGreedyAlgo
       {/* Featured Algorithms Showcase Grid */}
       <section className="catalog-preview-section">
         <div className="section-header">
-          <h2 className="section-title">10 Essential Sorting Algorithms</h2>
-          <p className="section-subtitle">Categorized from beginner foundations to advanced non-comparison algorithms</p>
+          <h2 className="section-title">Essential & Advanced Sorting Algorithms</h2>
+          <p className="section-subtitle">28 sorting algorithms categorized from beginner foundations to advanced Divide & Conquer</p>
         </div>
 
         <div className="categories-preview-grid">
-          {['Beginner', 'Intermediate', 'Advanced'].map((cat) => (
+          {['Beginner', 'Intermediate', 'Advanced', 'Divide and Conquer'].map((cat) => (
             <div key={cat} className="category-column">
               <div className="category-col-header">
-                <span className={`category-badge badge-${cat.toLowerCase()}`}>{cat}</span>
-                <span className="category-count">{ALGORITHMS.filter(a => a.category === cat).length} Algorithms</span>
+                <span className={`category-badge badge-${cat === 'Divide and Conquer' ? 'advanced' : cat.toLowerCase()}`}>
+                  {cat === 'Divide and Conquer' ? 'D & C' : cat}
+                </span>
+                <span className="category-count">{ALL_SORTING_ALGORITHMS.filter(a => a.category === cat).length} Algorithms</span>
               </div>
               <ul className="category-item-list">
-                {ALGORITHMS.filter(a => a.category === cat).map((algo) => (
+                {ALL_SORTING_ALGORITHMS.filter(a => a.category === cat).slice(0, 5).map((algo) => (
                   <li 
                     key={algo.id}
                     className="category-item-row"
@@ -192,7 +194,7 @@ export default function Home({ onNavigate, onSelectAlgorithm, onSelectGreedyAlgo
                   >
                     <div className="algo-item-info">
                       <span className="algo-item-name">{algo.name}</span>
-                      <span className="algo-item-complexity">{algo.complexity.average}</span>
+                      <span className="algo-item-complexity">{algo.complexity?.average || 'O(n log n)'}</span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
                   </li>

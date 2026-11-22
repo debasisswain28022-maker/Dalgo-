@@ -8,7 +8,7 @@ import StepActionPanel from '../components/StepActionPanel';
 import PseudocodeHighlight from '../components/PseudocodeHighlight';
 import VisualizerErrorBoundary from '../components/VisualizerErrorBoundary';
 import { runSortingAlgorithm } from '../algorithms';
-import { ALGORITHMS } from '../data/algorithms';
+import { ALGORITHMS, ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import { MORE_SORTING_ALGORITHMS } from '../data/moreAlgorithms';
 import { GREEDY_DP_ALGORITHMS } from '../greedy-dp/data/algorithmsData';
 import GreedyDPPage from '../greedy-dp/GreedyDPPage';
@@ -73,9 +73,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
 
   const algoId = (!isGreedyDp && selectedAlgoId) ? selectedAlgoId : 'bubble-sort';
   const isMoreAlgo = MORE_SORTING_ALGORITHMS.some(a => a.id === algoId);
-  const currentAlgoData = isMoreAlgo
-    ? MORE_SORTING_ALGORITHMS.find(a => a.id === algoId)
-    : (ALGORITHMS.find(a => a.id === algoId) || ALGORITHMS[0]);
+  const currentAlgoData = ALL_SORTING_ALGORITHMS.find(a => a.id === algoId) || ALL_SORTING_ALGORITHMS[0];
 
   // ── Load persisted preferences on mount ────────────────────────────────────
   const savedPrefs = loadPrefs();
@@ -301,7 +299,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
               className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all"
             >
               <Layers className="w-4 h-4" />
-              <span>Sorting Algorithms (10)</span>
+              <span>Sorting Algorithms (28)</span>
             </button>
             <button
               onClick={() => {
@@ -341,7 +339,7 @@ export default function Visualizer({ selectedAlgoId, onSelectAlgoId }) {
             className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white shadow-glow transition-all"
           >
             <Layers className="w-4 h-4" />
-            <span>Sorting Algorithms (10)</span>
+            <span>Sorting Algorithms (28)</span>
           </button>
           <button
             onClick={() => {

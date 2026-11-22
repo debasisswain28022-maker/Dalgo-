@@ -7,7 +7,8 @@ export default function AlgorithmCard({ algorithm, onLearn, onVisualize }) {
       case 'Beginner': return 'badge-beginner';
       case 'Intermediate': return 'badge-intermediate';
       case 'Advanced': return 'badge-advanced';
-      default: return '';
+      case 'Divide and Conquer': return 'badge-advanced';
+      default: return 'badge-intermediate';
     }
   };
 

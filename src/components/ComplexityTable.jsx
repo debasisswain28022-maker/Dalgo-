@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
-import { ALGORITHMS } from '../data/algorithms';
+import { ALL_SORTING_ALGORITHMS } from '../data/algorithms';
 import { ShieldCheck, ShieldAlert, Check, X, Play } from 'lucide-react';
 
 export default function ComplexityTable({ onSelectAlgorithm, onVisualizeAlgorithm }) {
   const [filterCategory, setFilterCategory] = useState('All');
 
   const filteredAlgos = filterCategory === 'All'
-    ? ALGORITHMS
-    : ALGORITHMS.filter(a => a.category === filterCategory);
+    ? ALL_SORTING_ALGORITHMS
+    : filterCategory === 'Additional'
+    ? ALL_SORTING_ALGORITHMS.filter(a => a.category === 'Additional Sorting Algorithms' || a.isMore)
+    : ALL_SORTING_ALGORITHMS.filter(a => a.category === filterCategory);
 
   return (
     <div className="complexity-table-wrapper">
       <div className="table-filter-bar">
         <h3 className="table-title">Algorithm Complexity Matrix</h3>
         <div className="category-filter-pills">
-          {['All', 'Beginner', 'Intermediate', 'Advanced'].map(cat => (
+          {['All', 'Beginner', 'Intermediate', 'Advanced', 'Divide and Conquer', 'Additional'].map(cat => (
             <button
               key={cat}
               className={`filter-btn ${filterCategory === cat ? 'active' : ''}`}
               onClick={() => setFilterCategory(cat)}
             >
-              {cat}
+              {cat === 'Divide and Conquer' ? 'D & C' : cat}
             </button>
           ))}
         </div>
